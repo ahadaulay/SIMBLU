@@ -185,7 +185,7 @@ Karena database eksternal, SIBLU tidak pernah membangun atau memulai ulang conta
 
 ```powershell
 # Perubahan kode tanpa migration baru: build lalu ganti container app sekaligus
-docker compe --osenv-file .env.production -f compose.production.yaml up -d --build app
+docker compose --env-file .env.production -f compose.production.yaml up -d --build app
 ```
 
 Jika ada migration baru, build dulu, backup database, jalankan migrasi dari image baru, lalu ganti container:

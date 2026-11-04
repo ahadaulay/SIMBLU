@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use ZipArchive;
 
@@ -131,6 +132,10 @@ class ReferenceSpreadsheetExport
                 }
 
                 $rows[] = ['values' => $values, 'style' => 4];
+
+                foreach ($this->detailRows($indicatorRows, $periods) as $detail) {
+                    $rows[] = ['values' => $detail, 'style' => 4];
+                }
             }
 
             $lastColumn = $this->columnName(count($headers));
@@ -143,6 +148,63 @@ class ReferenceSpreadsheetExport
         }
 
         return $sheets;
+    }
+
+    /**
+     * Uraikan rincian baris per butir menjadi baris terpisah di bawah baris agregat.
+     * Berlaku untuk indikator DYNAMIC (uraian bebas, mis. "Kamboja 100") dan FIXED (butir baku).
+     * Kolom "Tahun Sebelumnya" dikosongkan karena nilai pembanding hanya tersedia sebagai agregat.
+     */
+    private function detailRows(Collection $indicatorRows, Collection $periods): array
+    {
+        $definition = $indicatorRows->first()['definition'] ?? null;
+
+        if (! in_array($definition['form_type'] ?? null, ['DYNAMIC', 'FIXED'], true)) {
+            return [];
+        }
+
+        $resultField = $definition['result_field'];
+        $labels = [];
+        $valuesByPeriodAndLabel = [];
+
+        foreach ($indicatorRows as $indicatorRow) {
+            foreach ($indicatorRow['sources'] ?? [] as $source) {
+                foreach ($source['rows'] ?? [] as $detail) {
+                    $label = trim((string) ($detail['label'] ?? ''));
+
+                    if ($label === '') {
+                        continue;
+                    }
+
+                    if (! in_array($label, $labels, true)) {
+                        $labels[] = $label;
+                    }
+
+                    $period = $source['period'] ?? null;
+                    $value = $detail['values'][$resultField] ?? null;
+
+                    if ($period !== null && is_numeric($value)) {
+                        $valuesByPeriodAndLabel[$period][$label]
+                            = ($valuesByPeriodAndLabel[$period][$label] ?? 0) + (float) $value;
+                    }
+                }
+            }
+        }
+
+        $detailRows = [];
+
+        foreach ($labels as $label) {
+            $values = ['', '• '.$label];
+
+            foreach ($periods as $period) {
+                $values[] = null;
+                $values[] = $valuesByPeriodAndLabel[$period][$label] ?? null;
+            }
+
+            $detailRows[] = $values;
+        }
+
+        return $detailRows;
     }
 
     private function sheet(array $rows, array $widths, array $merges): string

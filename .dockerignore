@@ -8,6 +8,9 @@
 node_modules
 vendor
 tests
+docs
+output
+tmp
 storage/framework/cache/*
 storage/framework/sessions/*
 storage/framework/views/*

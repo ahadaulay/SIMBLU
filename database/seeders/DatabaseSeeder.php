@@ -12,8 +12,8 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             UnitSeeder::class,
             UnitAccountSeeder::class,
-            ReportingExampleSeeder::class,
-            CompleteWorkbookSeeder::class,
+            // ReportingExampleSeeder::class,
+            // CompleteWorkbookSeeder::class,
         ]);
     }
 }

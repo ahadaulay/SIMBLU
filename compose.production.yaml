@@ -1,0 +1,36 @@
+name: siblu
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    image: siblu-app:latest
+    restart: unless-stopped
+    init: true
+    env_file:
+      - ${APP_ENV_FILE:-.env.production}
+    environment:
+      DB_HOST: "${DB_HOST:?Isi DB_HOST di .env.production}"
+      DB_PORT: "${DB_PORT:-3306}"
+      DB_DATABASE: "${DB_DATABASE:?Isi DB_DATABASE di .env.production}"
+      DB_USERNAME: "${DB_USERNAME:?Isi DB_USERNAME di .env.production}"
+      DB_PASSWORD: "${DB_PASSWORD:?Isi DB_PASSWORD di .env.production}"
+      LOG_CHANNEL: stderr
+    ports:
+      - "${APP_PORT:-8800}:80"
+    volumes:
+      - app_storage:/var/www/html/storage
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 30s
+    networks:
+      - shared-net
+
+volumes:
+  app_storage:
+
+networks:
+  shared-net:
+    external: true

@@ -125,6 +125,14 @@ class ReportEditor extends Component
         $this->reload();
     }
 
+    public function updatedUploads(mixed $value, string $key): void
+    {
+        $entryId = (int) $key;
+        if ($entryId > 0 && isset($this->uploads[$entryId])) {
+            $this->upload($entryId, app(ReportWorkflow::class));
+        }
+    }
+
     public function upload(int $entryId, ReportWorkflow $workflow): void
     {
         $this->validate(['uploads.'.$entryId => ['required', 'file', 'mimes:'.implode(',', config('reporting.attachment_types')), 'max:'.config('reporting.attachment_max_kb')]]);

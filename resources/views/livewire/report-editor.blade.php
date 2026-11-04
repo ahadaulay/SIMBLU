@@ -34,7 +34,7 @@
                         <input type="checkbox" wire:model="sections.{{ $entry->id }}.no_activity"> Tidak ada kegiatan (hapus baris kosong dan isi alasannya)</label>
                     @endif
                     <div class="table-responsive">
-                        <table class="table align-middle">
+                        <table class="table table-bordered align-middle">
                             <thead>
                                 <tr>
                                     <th>Butir / uraian</th>
@@ -121,14 +121,17 @@
                     </div>
                 </fieldset>
                 <div class="mt-3">
-                    <h6>Lampiran {{ $definition['requires_attachment'] ? '(wajib)' : '' }}</h6>
+                    <h6>Lampiran {{ $definition['requires_attachment'] ? '(wajib)' : '(opsional)' }}</h6>
                     @foreach($report->attachments->where('entry_id',$entry->id) as $attachment)
                         <a class="d-block mb-2" href="{{ route('reports.attachment',$attachment) }}">{{ $attachment->name }}</a>
                     @endforeach
                     @if($editable)
                         <label for="upload-{{ $entry->id }}">Bukti pendukung (maks. {{ config('reporting.attachment_max_kb') / 1024 }} MB)</label>
                         <input id="upload-{{ $entry->id }}" type="file" class="form-control mb-2" wire:model="uploads.{{ $entry->id }}">
-                        <button class="btn btn-sm btn-outline-primary" wire:click="upload({{ $entry->id }})" wire:loading.attr="disabled">Unggah bukti</button>
+                        <div wire:loading wire:target="uploads.{{ $entry->id }},upload" class="text-muted" role="status">Mengunggah...</div>
+                        @error('uploads.'.$entry->id)
+                            <div class="text-danger">{{ $message }}</div>
+                        @enderror
                     @endif
                 </div>
             </section>

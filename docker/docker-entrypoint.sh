@@ -1,10 +1,27 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
 cd /var/www/html
-mkdir -p storage/logs bootstrap/cache
-chown -R www-data:www-data storage bootstrap/cache
 
-php artisan migrate --force
+# Pastikan direktori runtime ada dan dapat ditulis oleh web server.
+mkdir -p \
+    bootstrap/cache \
+    storage/app/public \
+    storage/framework/cache/data \
+    storage/framework/sessions \
+    storage/framework/views \
+    storage/logs
+chown -R www-data:www-data bootstrap/cache storage
 
-exec apache2-foreground
+# Tautkan storage publik bila belum ada (mis. storage berasal dari named volume kosong).
+if [ ! -L public/storage ]; then
+    php artisan storage:link || true
+fi
+
+# Bangun ulang cache konfigurasi agar perubahan .env ikut saat container start.
+# Migrasi database TIDAK dijalankan otomatis; jalankan manual sesuai panduan deploy.
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+exec "$@"

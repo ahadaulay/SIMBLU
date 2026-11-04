@@ -115,7 +115,7 @@ class ReportingTest extends TestCase
         foreach (['units.index' => UnitTable::class, 'users.index' => UserTable::class, 'periods.index' => PeriodTable::class, 'categories.index' => CategoryTable::class, 'indicators.index' => IndicatorTable::class, 'assignments.index' => AssignmentTable::class] as $route => $component) {
             $this->get(route($route))->assertOk()->assertSeeLivewire($component);
         }
-        $this->get(route('reporting.dashboard'))->assertOk();
+        $this->get(route('dashboard'))->assertOk();
         $this->get(route('reports.index'))->assertOk();
         $this->get(route('recaps.index'))->assertOk();
     }
@@ -271,7 +271,7 @@ class ReportingTest extends TestCase
         $this->indicator->update(['requires_attachment' => true]);
         $report = $this->start();
         $entry = $report->entries()->first();
-        Livewire::test(ReportEditor::class, ['reportId' => $report->id])->set('sections.'.$entry->id.'.rows.0.values.amount', 2)->call('submit')->assertHasErrors('sections.'.$entry->id.'.attachment')->set('uploads.'.$entry->id, UploadedFile::fake()->create('proof.pdf', 10, 'application/pdf'))->call('upload', $entry->id)->assertHasNoErrors()->call('submit')->assertHasNoErrors();
+        Livewire::test(ReportEditor::class, ['reportId' => $report->id])->set('sections.'.$entry->id.'.rows.0.values.amount', 2)->call('submit')->assertHasErrors('sections.'.$entry->id.'.attachment')->set('uploads.'.$entry->id, UploadedFile::fake()->create('proof.pdf', 10, 'application/pdf'))->assertHasNoErrors()->call('submit')->assertHasNoErrors();
         $attachment = $report->attachments()->firstOrFail();
         Storage::disk('local')->assertExists($attachment->path);
         $this->get(route('reports.attachment', $attachment))->assertOk();

@@ -42,7 +42,6 @@
                                 'items' => [
                                     ['imports.*', 'imports.index', 'ti-file-import', 'Impor Historis'],
                                     ['reports.*', 'reports.index', 'ti-clipboard-check', 'Verifikasi Laporan'],
-                                    ['reporting.dashboard', 'reporting.dashboard', 'ti-chart-bar', 'Pemantauan'],
                                     ['recaps.*', 'recaps.index', 'ti-file-analytics', 'Laporan Custom'],
                                 ],
                             ],
@@ -77,14 +76,12 @@
                             @php
                                 $reportingMenus = [
                                     ['reports.*', 'reports.index', 'ti-edit', '1. Isi Laporan'],
-                                    ['reporting.dashboard', 'reporting.dashboard', 'ti-list-check', '2. Pantau Status'],
-                                    ['recaps.*', 'recaps.index', 'ti-file-analytics', '3. Lihat Rekap'],
+                                    ['recaps.*', 'recaps.index', 'ti-file-analytics', '2. Lihat Rekap'],
                                 ];
                             @endphp
                         @else
                             @php
                                 $reportingMenus = [
-                                    ['reporting.dashboard', 'reporting.dashboard', 'ti-chart-bar', 'Pemantauan'],
                                     ['reports.*', 'reports.index', 'ti-clipboard-text', 'Laporan Unit'],
                                     ['recaps.*', 'recaps.index', 'ti-file-analytics', 'Laporan Custom'],
                                 ];

@@ -26,8 +26,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('reporting-admin', fn (User $user) => $user->hasReportingRole(['ADMIN']));
         Gate::define('reporting-access', fn (User $user) => $user->hasReportingRole(['ADMIN', 'UNIT', 'PIMPINAN']));
         Gate::define('reporting-view', fn (User $user, UnitReport $report) => $user->hasReportingRole(['ADMIN', 'PIMPINAN']) || ($user->hasReportingRole(['UNIT']) && $user->unit_id === $report->unit_id));
-        // Paksa semua URL pakai https di server produksi
-        if (config('app.env') === 'production') {
+        // Force https only when the app is served over https, so local HTTP testing of the production image still works.
+        if (config('app.env') === 'production' && str_starts_with((string) config('app.url'), 'https://')) {
             URL::forceScheme('https');
         }
     }

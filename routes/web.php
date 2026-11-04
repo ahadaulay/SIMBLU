@@ -11,7 +11,6 @@ use App\Http\Controllers\PeriodController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RecapController;
 use App\Http\Controllers\ReportController;
-use App\Http\Controllers\ReportingDashboardController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
 use Illuminate\Auth\Middleware\Authorize;
@@ -34,7 +33,6 @@ Route::middleware('auth')->group(function (): void {
         ->name('profile.password.update');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::middleware(Authorize::class.':reporting-access')->group(function (): void {
-        Route::get('/reporting', [ReportingDashboardController::class, 'index'])->name('reporting.dashboard');
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/{report}', [ReportController::class, 'show'])->name('reports.show');
         Route::get('/report-attachments/{attachment}', [ReportController::class, 'attachment'])->name('reports.attachment');

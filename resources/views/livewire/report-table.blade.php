@@ -34,8 +34,31 @@
             <input id="report-search" class="form-control" wire:model.live.debounce.300ms="search">
         </div>
     </div>
-    @if(auth()->user()->role === 'UNIT')
-        <button class="btn btn-primary mb-3 align-self-start" wire:click="start" wire:loading.attr="disabled">Buat / lanjutkan laporan periode terpilih</button>
+    @if($pendingPeriods->isNotEmpty())
+        <h5>Laporan yang perlu diisi</h5>
+        <div class="table-responsive mb-3">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Periode</th>
+                        <th>Batas pengisian</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($pendingPeriods as $pendingPeriod)
+                        <tr wire:key="pending-{{ $pendingPeriod->id }}">
+                            <td>{{ $pendingPeriod->label }}</td>
+                            <td>{{ $pendingPeriod->deadline?->format('d/m/Y') }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" wire:click="start({{ $pendingPeriod->id }})" wire:loading.attr="disabled">Isi laporan</button>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        <h5>Laporan tersimpan</h5>
     @endif
     <div class="table-responsive">
         <table class="table">

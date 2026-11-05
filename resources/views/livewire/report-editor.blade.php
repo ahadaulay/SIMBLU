@@ -1,8 +1,47 @@
-<div>
+<div class="report-editor">
+    <style>
+        /* Darker gray lines, text, and form borders so the indicator form is easier to read. */
+        .report-editor .report-entry {
+            border: 2px solid #6c757d;
+            margin-bottom: 1.5rem;
+            color: #343a40;
+        }
+
+        .report-editor .report-entry-title {
+            border-bottom: 2px solid #6c757d;
+            padding-bottom: .5rem;
+            color: #212529;
+        }
+
+        .report-editor .report-entry .text-muted,
+        .report-editor .report-entry label,
+        .report-editor .report-entry small {
+            color: #495057 !important;
+        }
+
+        .report-editor .report-entry .table,
+        .report-editor .report-entry .table th,
+        .report-editor .report-entry .table td {
+            border-color: #6c757d !important;
+            color: #343a40;
+        }
+
+        .report-editor .report-entry .table thead th {
+            background-color: #e9ecef;
+            color: #212529;
+        }
+
+        .report-editor .report-entry .form-control,
+        .report-editor .report-entry .form-select {
+            border-color: #6c757d;
+            color: #212529;
+        }
+    </style>
     <div class="d-flex flex-wrap justify-content-between gap-3 mb-3">
         <div>
             <h4>{{ $report->unit->name }} — {{ $report->period->label }}</h4>
             <p>{{ config('reporting.statuses')[$report->status] }} · Versi {{ $report->version }} · Kelengkapan tersimpan {{ $completion }}%</p>
+            <p class="mb-0"><strong>Jumlah indikator yang harus diisi: {{ $report->entries->count() }}</strong></p>
         </div>
         <button class="btn btn-outline-secondary align-self-start" wire:click="reload" wire:confirm="Muat ulang dan lepaskan isian yang belum disimpan?">Muat ulang</button>
     </div>
@@ -24,8 +63,10 @@
     @endif
     @foreach($report->entries as $entry)
         @php($definition = $entry->definition)
-        <section class="card p-3" wire:key="entry-{{ $entry->id }}">
-            <h5>{{ $definition['name'] }} <small class="text-muted">{{ $entry->required ? 'Wajib' : 'Opsional' }} · v{{ $definition['version'] }}</small>
+        <section class="card p-3 report-entry" wire:key="entry-{{ $entry->id }}">
+            <h5 class="report-entry-title d-flex justify-content-between align-items-baseline gap-3">
+                <span>{{ $loop->iteration }}. {{ $definition['name'] }}</span>
+                <small class="text-muted text-nowrap">{{ $entry->required ? 'Wajib' : 'Opsional' }} · v{{ $definition['version'] }}</small>
             </h5>
             <p>{{ $definition['description'] }}</p>
             <fieldset @disabled(!$editable)>

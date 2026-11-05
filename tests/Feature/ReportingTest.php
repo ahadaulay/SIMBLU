@@ -10,6 +10,7 @@ use App\Livewire\IndicatorTable;
 use App\Livewire\PeriodTable;
 use App\Livewire\RecapTable;
 use App\Livewire\ReportEditor;
+use App\Livewire\ReportTable;
 use App\Livewire\UnitTable;
 use App\Livewire\UserTable;
 use App\Models\Indicator;
@@ -53,6 +54,28 @@ class ReportingTest extends TestCase
         $this->actingAs($this->operator)->get(route('recaps.download', $export))->assertForbidden();
         $this->admin->update(['role' => 'PIMPINAN']);
         $this->actingAs($this->admin->fresh())->get(route('recaps.download', $export))->assertForbidden();
+    }
+
+    public function test_unit_sees_assigned_open_period_and_can_start_report_from_list(): void
+    {
+        $closed = ReportingPeriod::create(['year' => 2026, 'quarter' => 2, 'deadline' => '2026-07-10', 'status' => 'CLOSED']);
+        $this->assign($closed);
+        ReportingPeriod::create(['year' => 2026, 'quarter' => 3, 'deadline' => '2026-10-10', 'status' => 'OPEN']);
+        $this->actingAs($this->operator);
+
+        $component = Livewire::test(ReportTable::class)
+            ->assertSee('Laporan yang perlu diisi')
+            ->assertViewHas('pendingPeriods', fn ($periods) => $periods->pluck('id')->all() === [$this->period->id]);
+
+        $component->call('start', $this->period->id);
+        $report = UnitReport::where('unit_id', $this->unit->id)->where('period_id', $this->period->id)->firstOrFail();
+        $component->assertRedirect(route('reports.show', $report));
+        Livewire::test(ReportTable::class)
+            ->assertDontSee('Laporan yang perlu diisi')
+            ->assertViewHas('pendingPeriods', fn ($periods) => $periods->isEmpty());
+
+        $this->actingAs($this->admin);
+        Livewire::test(ReportTable::class)->assertViewHas('pendingPeriods', fn ($periods) => $periods->isEmpty());
     }
 
     private User $admin;

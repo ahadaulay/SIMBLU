@@ -6,7 +6,7 @@
     <h5 class="mb-2">Selamat datang di SIBLU</h5>
     <p class="mb-4">Silakan login untuk mengakses pelaporan kinerja unit.</p>
 
-    <form action="{{ route('login.store') }}" method="POST" class="mb-3">
+    <form id="login-form" action="{{ route('login.store') }}" method="POST" class="mb-3">
         @csrf
         <div class="mb-3">
             <label for="email" class="form-label">Email atau username</label>
@@ -29,4 +29,13 @@
     </form>
 
     <p class="text-center mb-0">Belum punya akun? <a href="{{ route('register') }}">Daftar</a></p>
+
+    <script>
+        document.getElementById('login-form').addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' && !event.isComposing) {
+                event.preventDefault();
+                event.currentTarget.requestSubmit();
+            }
+        });
+    </script>
 @endsection

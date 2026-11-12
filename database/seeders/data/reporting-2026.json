@@ -1,0 +1,3598 @@
+{
+  "year": 2026,
+  "frequency": "QUARTERLY",
+  "source_filename": "DATA LAPORAN KINERJA LAYANAN 2026.xlsx",
+  "source_sha256": "e854446b93c1277ef3d1803c15b90c0ad412e2cb9e087361db134419f2a868f1",
+  "units": [
+    {
+      "sheet": "BAG. UMUM",
+      "unit_code": "BAG-UMUM",
+      "category_code": "KL26-BAG-UMUM",
+      "category_name": "Kinerja Layanan 2026 - BAG. UMUM",
+      "indicators": [
+        {
+          "name": "REALISASI DATA GEDUNG DAN BANGUNAN 2026",
+          "source_rows": "1-15",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Uraian",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-BAG-UMUM-01"
+        },
+        {
+          "name": "REALISASI DATA LABORATORIUM 2026",
+          "source_rows": "16-32",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Uraian",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-BAG-UMUM-02"
+        },
+        {
+          "name": "REALISASI KENDERAAN DINAS 2026",
+          "source_rows": "33-42",
+          "form_type": "FIXED",
+          "aggregation": "LAST",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Kendaraan Roda Enam"
+            },
+            {
+              "code": "item_002",
+              "label": "Kendaraan Roda Empat"
+            },
+            {
+              "code": "item_003",
+              "label": "Kendaraan Roda Tiga"
+            },
+            {
+              "code": "item_004",
+              "label": "Kendaraan Roda Dua"
+            }
+          ],
+          "code": "KL26-BAG-UMUM-03"
+        },
+        {
+          "name": "REALISASI DATA INVENTARIS 2026",
+          "source_rows": "43-90",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Uraian",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-BAG-UMUM-04"
+        },
+        {
+          "name": "REALISASI KERJA SAMA 2026",
+          "source_rows": "91-97",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Uraian",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-BAG-UMUM-05"
+        }
+      ]
+    },
+    {
+      "sheet": "AKADEMIK",
+      "unit_code": "AKADEMIK",
+      "category_code": "KL26-AKADEMIK",
+      "category_name": "Kinerja Layanan 2026 - AKADEMIK",
+      "indicators": [
+        {
+          "name": "REALISASI JUMLAH PENERIMAAN MAHASISWA BARU SARJANA TAHUN 2026",
+          "source_rows": "1-11",
+          "form_type": "FIXED",
+          "aggregation": "LAST",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Pendaftar Per tahun"
+            },
+            {
+              "code": "item_002",
+              "label": "Pendaftar Diterima"
+            },
+            {
+              "code": "item_003",
+              "label": "Pendaftar Registrasi"
+            },
+            {
+              "code": "item_004",
+              "label": "Rasio Pendaftar dan Diterima"
+            },
+            {
+              "code": "item_005",
+              "label": "Rasio Diterima dan Registrasi"
+            },
+            {
+              "code": "item_006",
+              "label": "Daya Tampung"
+            }
+          ],
+          "code": "KL26-AKADEMIK-01"
+        },
+        {
+          "name": "REALISASI JUMLAH PENERIMAAN MAHASISWA BARU PASCASARJANA TAHUN 2026",
+          "source_rows": "12-22",
+          "form_type": "FIXED",
+          "aggregation": "LAST",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Pendaftar Per tahun"
+            },
+            {
+              "code": "item_002",
+              "label": "Pendaftar Diterima"
+            },
+            {
+              "code": "item_003",
+              "label": "Pendaftar Registrasi"
+            },
+            {
+              "code": "item_004",
+              "label": "Rasio Pendaftar dan Diterima"
+            },
+            {
+              "code": "item_005",
+              "label": "Rasio Diterima dan Registrasi"
+            },
+            {
+              "code": "item_006",
+              "label": "Daya Tampung"
+            }
+          ],
+          "code": "KL26-AKADEMIK-02"
+        },
+        {
+          "name": "REALISASI JUMLAH MAHASISWA TAHUN 2026",
+          "source_rows": "23-34",
+          "form_type": "FIXED",
+          "aggregation": "LAST",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Tarbiyah dan Ilmu Keguruan"
+            },
+            {
+              "code": "item_002",
+              "label": "Syariah dan Ilmu Hukum"
+            },
+            {
+              "code": "item_003",
+              "label": "Dakwah dan Ilmu Komunikasi"
+            },
+            {
+              "code": "item_004",
+              "label": "Ekonomi dan Bisnis Islam"
+            },
+            {
+              "code": "item_005",
+              "label": "Pascasarjana"
+            },
+            {
+              "code": "item_006",
+              "label": "Fakultas Saintek"
+            }
+          ],
+          "code": "KL26-AKADEMIK-03"
+        },
+        {
+          "name": "REALISASI JUMLAH MAHASISWA ASING TAHUN 2026",
+          "source_rows": "35-44",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Nama negara",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-AKADEMIK-04"
+        },
+        {
+          "name": "REALISASI PENERIMA BEASISWA TAHUN 2026",
+          "source_rows": "45-58",
+          "form_type": "FIXED",
+          "aggregation": "LAST",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Beasiswa KIP /Bidik Misi"
+            },
+            {
+              "code": "item_002",
+              "label": "Bank Indonesia"
+            },
+            {
+              "code": "item_003",
+              "label": "Peningkatan Prestasi Akademik"
+            },
+            {
+              "code": "item_004",
+              "label": "Tahfidz"
+            },
+            {
+              "code": "item_005",
+              "label": "Kajian Keislaman"
+            },
+            {
+              "code": "item_006",
+              "label": "Beasiswa GENBI"
+            },
+            {
+              "code": "item_007",
+              "label": "Beasiswa UKT"
+            },
+            {
+              "code": "item_008",
+              "label": "Beasiswa LPDP"
+            }
+          ],
+          "code": "KL26-AKADEMIK-05"
+        },
+        {
+          "name": "REALISASI KERJA SAMA 2026",
+          "source_rows": "59-65",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Uraian",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-AKADEMIK-06"
+        }
+      ]
+    },
+    {
+      "sheet": "SDM",
+      "unit_code": "SDM",
+      "category_code": "KL26-SDM",
+      "category_name": "Kinerja Layanan 2026 - SDM",
+      "indicators": [
+        {
+          "name": "REALISASI JUMLAH SDM TAHUN 2026",
+          "source_rows": "1-16",
+          "form_type": "FIXED",
+          "aggregation": "LAST",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Jumlah Dosen PNS"
+            },
+            {
+              "code": "item_002",
+              "label": "Jumlah Dosen PPPK"
+            },
+            {
+              "code": "item_003",
+              "label": "Jumlah Dosen Non ASN"
+            },
+            {
+              "code": "item_004",
+              "label": "Jumlah Tenaga Kependidikan PNS"
+            },
+            {
+              "code": "item_005",
+              "label": "Jumlah Tenaga Kependidikan PPPK"
+            },
+            {
+              "code": "item_006",
+              "label": "Jumlah Tenaga Kependidikan Non ASN"
+            }
+          ],
+          "code": "KL26-SDM-01"
+        },
+        {
+          "name": "REALISASI JUMLAH ASN TAHUN 2026",
+          "source_rows": "17-31",
+          "form_type": "FIXED",
+          "aggregation": "LAST",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Jumlah dosen dengan NIDN"
+            },
+            {
+              "code": "item_002",
+              "label": "Jumlah dosen dengan NIDK"
+            },
+            {
+              "code": "item_003",
+              "label": "Jumlah dosen yang berkegiatan tridarma di perguruan tinggi lain"
+            },
+            {
+              "code": "item_004",
+              "label": "Jumlah dosen yang berkegiatan tridarma di QS100 berdasarkan bidang ilmu (QS100 by subject)"
+            },
+            {
+              "code": "item_005",
+              "label": "Jumlah dosen yang bekerja sebagai praktisi"
+            },
+            {
+              "code": "item_006",
+              "label": "Jumlah dosen yang membina mahasiswa yang berhasil meraih prestasi dalam 5 (lima) tahun terakhir"
+            },
+            {
+              "code": "item_007",
+              "label": "Jumlah dosen yang berkualilikasi S3"
+            },
+            {
+              "code": "item_008",
+              "label": "Jumlah dosen yang memiliki sertifikat kompetensi/ profesi"
+            },
+            {
+              "code": "item_009",
+              "label": "Jumlah dosen yang berpengalaman kerja sebagai praktisi"
+            },
+            {
+              "code": "item_010",
+              "label": "Jumlah Tendik"
+            }
+          ],
+          "code": "KL26-SDM-02"
+        },
+        {
+          "name": "REALISASI DATA STATISTIK TENAGA PENDIDIK (DOSEN) BERDASARKAN PENDIDIKAN TAHUN 2026",
+          "source_rows": "32-46",
+          "form_type": "FIXED",
+          "aggregation": "LAST",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Dosen Tetap ASN - Doktor/ Doktor Terapan/ Subspesialis"
+            },
+            {
+              "code": "item_002",
+              "label": "Dosen Tetap ASN - Magister/ Magister Terapan/ Spesialis"
+            },
+            {
+              "code": "item_003",
+              "label": "Dosen Tetap Non ASN - Doktor/ Doktor Terapan/ Subspesialis"
+            },
+            {
+              "code": "item_004",
+              "label": "Dosen Tetap Non ASN - Magister/ Magister Terapan/ Spesialis"
+            }
+          ],
+          "code": "KL26-SDM-03"
+        },
+        {
+          "name": "REALISASI DATA STATISTIK TENAGA PENDIDIK (DOSEN) BERDASARKAN JABATAN TAHUN 2026",
+          "source_rows": "47-57",
+          "form_type": "FIXED",
+          "aggregation": "LAST",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Guru Besar"
+            },
+            {
+              "code": "item_002",
+              "label": "Lektor Kepala"
+            },
+            {
+              "code": "item_003",
+              "label": "Lektor"
+            },
+            {
+              "code": "item_004",
+              "label": "Asisten Ahli"
+            },
+            {
+              "code": "item_005",
+              "label": "Calon Dosen Tetap"
+            }
+          ],
+          "code": "KL26-SDM-04"
+        },
+        {
+          "name": "REALISASI DATA STATISTIK TENAGA PENDIDIK BERDASARKAN FAKULTAS TAHUN 2026",
+          "source_rows": "58-70",
+          "form_type": "FIXED",
+          "aggregation": "LAST",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "FTIK"
+            },
+            {
+              "code": "item_002",
+              "label": "FASIH"
+            },
+            {
+              "code": "item_003",
+              "label": "FDIK"
+            },
+            {
+              "code": "item_004",
+              "label": "FEBI"
+            },
+            {
+              "code": "item_005",
+              "label": "Pascasarjana"
+            }
+          ],
+          "code": "KL26-SDM-05"
+        },
+        {
+          "name": "REALISASI JUMLAH TENAGA KEPENDIDIKAN TAHUN 2026",
+          "source_rows": "71-80",
+          "form_type": "FIXED",
+          "aggregation": "LAST",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "ASN (PNS DAN PPP)"
+            },
+            {
+              "code": "item_002",
+              "label": "Non ASN (NON PNS DAN NON PPPK)"
+            },
+            {
+              "code": "item_003",
+              "label": "Persentase ASN"
+            },
+            {
+              "code": "item_004",
+              "label": "Persentase Non ASN"
+            }
+          ],
+          "code": "KL26-SDM-06"
+        },
+        {
+          "name": "REALISASI JUMLAH TENAGA KEPENDIDIKAN BERDASARKAN PENDIDIKAN TAHUN 2026",
+          "source_rows": "81-91",
+          "form_type": "FIXED",
+          "aggregation": "LAST",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "S3"
+            },
+            {
+              "code": "item_002",
+              "label": "S2"
+            },
+            {
+              "code": "item_003",
+              "label": "S1"
+            },
+            {
+              "code": "item_004",
+              "label": "D3"
+            },
+            {
+              "code": "item_005",
+              "label": "SMA"
+            }
+          ],
+          "code": "KL26-SDM-07"
+        },
+        {
+          "name": "REALISASI JUMLAH TENAGA KEPENDIDIKAN BERDASARKAN PANGKAT/GOLONGAN TAHUN 2026",
+          "source_rows": "92-111",
+          "form_type": "FIXED",
+          "aggregation": "LAST",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "IV c"
+            },
+            {
+              "code": "item_002",
+              "label": "IV b"
+            },
+            {
+              "code": "item_003",
+              "label": "IV a"
+            },
+            {
+              "code": "item_004",
+              "label": "III d"
+            },
+            {
+              "code": "item_005",
+              "label": "III c"
+            },
+            {
+              "code": "item_006",
+              "label": "III b"
+            },
+            {
+              "code": "item_007",
+              "label": "III a"
+            },
+            {
+              "code": "item_008",
+              "label": "II d"
+            },
+            {
+              "code": "item_009",
+              "label": "II c"
+            },
+            {
+              "code": "item_010",
+              "label": "II b"
+            },
+            {
+              "code": "item_011",
+              "label": "II a"
+            },
+            {
+              "code": "item_012",
+              "label": "PPPK"
+            },
+            {
+              "code": "item_013",
+              "label": "Pegawai Kontrak"
+            }
+          ],
+          "code": "KL26-SDM-08"
+        },
+        {
+          "name": "REALISASI DATA STATISTIK TENAGA KEPENDIDIKAN BERDASARKAN UNIT TAHUN 2026",
+          "source_rows": "112-135",
+          "form_type": "FIXED",
+          "aggregation": "LAST",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "FTIK"
+            },
+            {
+              "code": "item_002",
+              "label": "FASIH"
+            },
+            {
+              "code": "item_003",
+              "label": "FDIK"
+            },
+            {
+              "code": "item_004",
+              "label": "FEBI"
+            },
+            {
+              "code": "item_005",
+              "label": "Pascasarjana"
+            },
+            {
+              "code": "item_006",
+              "label": "Biro UAPK"
+            },
+            {
+              "code": "item_007",
+              "label": "LPM"
+            },
+            {
+              "code": "item_008",
+              "label": "LPPM"
+            },
+            {
+              "code": "item_009",
+              "label": "SPI"
+            },
+            {
+              "code": "item_010",
+              "label": "UPT TIPD"
+            },
+            {
+              "code": "item_011",
+              "label": "UPT PERPUSTAKAAN"
+            },
+            {
+              "code": "item_012",
+              "label": "UPT PENGEMBANGAN KARIR"
+            },
+            {
+              "code": "item_013",
+              "label": "UPT BAHASA"
+            },
+            {
+              "code": "item_014",
+              "label": "UPT MA'HAD AL JAMI'AH"
+            },
+            {
+              "code": "item_015",
+              "label": "UPT PENGEMBANGAN BISNIS"
+            }
+          ],
+          "code": "KL26-SDM-09"
+        },
+        {
+          "name": "REALISASI KERJA SAMA 2026",
+          "source_rows": "136-142",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Uraian",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-SDM-10"
+        }
+      ]
+    },
+    {
+      "sheet": "HUMAS",
+      "unit_code": "HUMAS",
+      "category_code": "KL26-HUMAS",
+      "category_name": "Kinerja Layanan 2026 - HUMAS",
+      "indicators": [
+        {
+          "name": "REALISASI KERJA SAMA 2026",
+          "source_rows": "1-7",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Uraian",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-HUMAS-01"
+        }
+      ]
+    },
+    {
+      "sheet": "FTIK",
+      "unit_code": "FTIK",
+      "category_code": "KL26-FTIK",
+      "category_name": "Kinerja Layanan 2026 - FTIK",
+      "indicators": [
+        {
+          "name": "REALISASI DATA JUMLAH PRESTASI MAHASISWA PERPRODI TAHUN 2026",
+          "source_rows": "1-264",
+          "form_type": "DYNAMIC",
+          "aggregation": "DISTINCT",
+          "result_field": "uraian",
+          "fields": [
+            {
+              "code": "program_studi",
+              "label": "Program studi",
+              "type": "CHOICE",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "Pendidikan Agama Islam\nPendidikan Bahasa Arab\nTadris Bahasa Inggris\nPendidikan Matematika\nPend. Guru Madrasah Ibtidaiyah (PGMI)\nPendidikan Islam Anak Usia Dini\nTadris Kimia\nTadris Biologi\nTadris Fisika\nTadris Bahasa Indonesia\nTeknologi Informasi",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "uraian",
+              "label": "Nama mahasiswa dan prestasi",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-FTIK-01"
+        },
+        {
+          "name": "REALISASI REKAP PRESTASI MAHASISWA",
+          "source_rows": "1-264",
+          "form_type": "FIXED",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Lokal"
+            },
+            {
+              "code": "item_002",
+              "label": "Internasional"
+            },
+            {
+              "code": "item_003",
+              "label": "Nasional"
+            },
+            {
+              "code": "item_004",
+              "label": "Provinsi/Regional"
+            }
+          ],
+          "code": "KL26-FTIK-02"
+        },
+        {
+          "name": "REALISASI JUMLAH PENGABDIAN MASYARAKAT TAHUN 2026",
+          "source_rows": "265-407",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Uraian",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-FTIK-03"
+        },
+        {
+          "name": "REALISASI KERJA SAMA 2026",
+          "source_rows": "408-419",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Nama kerja sama",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-FTIK-04"
+        }
+      ]
+    },
+    {
+      "sheet": "FASIH ",
+      "unit_code": "FASIH",
+      "category_code": "KL26-FASIH",
+      "category_name": "Kinerja Layanan 2026 - FASIH",
+      "indicators": [
+        {
+          "name": "REALISASI DATA JUMLAH PRESTASI MAHASISWA PERPRODI TAHUN 2026",
+          "source_rows": "1-147",
+          "form_type": "DYNAMIC",
+          "aggregation": "DISTINCT",
+          "result_field": "uraian",
+          "fields": [
+            {
+              "code": "program_studi",
+              "label": "Program studi",
+              "type": "CHOICE",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "Hukum Keluarga Islam (Ahwal Syakhshiyyah)\nHukum Ekonomi Syariah\nHukum Tata Negara (Siyasah)\nIlmu Al-Qur'an dan Tafsir\nHukum Pidana Islam",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "uraian",
+              "label": "Nama mahasiswa dan prestasi",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-FASIH-01"
+        },
+        {
+          "name": "REALISASI REKAP PRESTASI MAHASISWA",
+          "source_rows": "1-147",
+          "form_type": "FIXED",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Lokal"
+            },
+            {
+              "code": "item_002",
+              "label": "Internasional"
+            },
+            {
+              "code": "item_003",
+              "label": "Nasional"
+            },
+            {
+              "code": "item_004",
+              "label": "Provinsi/Regional"
+            }
+          ],
+          "code": "KL26-FASIH-02"
+        },
+        {
+          "name": "REALISASI JUMLAH PENGABDIAN MASYARAKAT TAHUN 2026",
+          "source_rows": "148-159",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Uraian",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-FASIH-03"
+        },
+        {
+          "name": "REALISASI KERJA SAMA 2026",
+          "source_rows": "160-166",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Nama kerja sama",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-FASIH-04"
+        }
+      ]
+    },
+    {
+      "sheet": "FDIK",
+      "unit_code": "PDIK",
+      "category_code": "KL26-PDIK",
+      "category_name": "Kinerja Layanan 2026 - FDIK",
+      "indicators": [
+        {
+          "name": "REALISASI DATA JUMLAH PRESTASI MAHASISWA PERPRODI TAHUN 2026",
+          "source_rows": "1-145",
+          "form_type": "DYNAMIC",
+          "aggregation": "DISTINCT",
+          "result_field": "uraian",
+          "fields": [
+            {
+              "code": "program_studi",
+              "label": "Program studi",
+              "type": "CHOICE",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "Bimbingan dan Konseling Islam\nKomunikasi dan Penyiaran Islam\nManajemen Dakwah\nPengembangan Masyarakat Islam\nDesain Komunikasi Visual",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "uraian",
+              "label": "Nama mahasiswa dan prestasi",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-PDIK-01"
+        },
+        {
+          "name": "REALISASI REKAP PRESTASI MAHASISWA",
+          "source_rows": "1-145",
+          "form_type": "FIXED",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Lokal"
+            },
+            {
+              "code": "item_002",
+              "label": "Internasional"
+            },
+            {
+              "code": "item_003",
+              "label": "Nasional"
+            },
+            {
+              "code": "item_004",
+              "label": "Provinsi/Regional"
+            }
+          ],
+          "code": "KL26-PDIK-02"
+        },
+        {
+          "name": "REALISASI JUMLAH PENGABDIAN MASYARAKAT TAHUN 2026",
+          "source_rows": "146-185",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Uraian",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-PDIK-03"
+        },
+        {
+          "name": "REALISASI KERJA SAMA 2026",
+          "source_rows": "186-192",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Nama kerja sama",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-PDIK-04"
+        }
+      ]
+    },
+    {
+      "sheet": "FEBI ",
+      "unit_code": "FEBI",
+      "category_code": "KL26-FEBI",
+      "category_name": "Kinerja Layanan 2026 - FEBI",
+      "indicators": [
+        {
+          "name": "REALISASI DATA JUMLAH PRESTASI MAHASISWA PERPRODI TAHUN 2026",
+          "source_rows": "1-210",
+          "form_type": "DYNAMIC",
+          "aggregation": "DISTINCT",
+          "result_field": "uraian",
+          "fields": [
+            {
+              "code": "program_studi",
+              "label": "Program studi",
+              "type": "CHOICE",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "Ekonomi Syariah\nPerbankan Syariah\nManajemen Keuangan Syariah\nAkuntansi Syariah\nManajemen Bisnis Syariah\nBisnis Digital",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "uraian",
+              "label": "Nama mahasiswa dan prestasi",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-FEBI-01"
+        },
+        {
+          "name": "REALISASI REKAP PRESTASI MAHASISWA",
+          "source_rows": "1-210",
+          "form_type": "FIXED",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Lokal"
+            },
+            {
+              "code": "item_002",
+              "label": "Internasional"
+            },
+            {
+              "code": "item_003",
+              "label": "Nasional"
+            },
+            {
+              "code": "item_004",
+              "label": "Provinsi/Regional"
+            }
+          ],
+          "code": "KL26-FEBI-02"
+        },
+        {
+          "name": "REALISASI JUMLAH PENGABDIAN MASYARAKAT TAHUN 2026",
+          "source_rows": "211-225",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Uraian",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-FEBI-03"
+        },
+        {
+          "name": "REALISASI KERJA SAMA 2026",
+          "source_rows": "226-235",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Nama kerja sama",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-FEBI-04"
+        }
+      ]
+    },
+    {
+      "sheet": "PASCA",
+      "unit_code": "PASCA",
+      "category_code": "KL26-PASCA",
+      "category_name": "Kinerja Layanan 2026 - PASCA",
+      "indicators": [
+        {
+          "name": "REALISASI DATA JUMLAH PRESTASI MAHASISWA PERPRODI TAHUN 2026",
+          "source_rows": "1-181",
+          "form_type": "DYNAMIC",
+          "aggregation": "DISTINCT",
+          "result_field": "uraian",
+          "fields": [
+            {
+              "code": "program_studi",
+              "label": "Program studi",
+              "type": "CHOICE",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "Pendidikan Agama Islam\nHukum Keluarga Islam (Ahwal Syakhshiyyah)\nKomunikasi dan Penyiaran Islam\nEkonomi Syariah\nTadris Matematika\nPendidikan Dasar\nStudi Islam",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "uraian",
+              "label": "Nama mahasiswa dan prestasi",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-PASCA-01"
+        },
+        {
+          "name": "REALISASI REKAP PRESTASI MAHASISWA",
+          "source_rows": "1-181",
+          "form_type": "FIXED",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Lokal"
+            },
+            {
+              "code": "item_002",
+              "label": "Internasional"
+            },
+            {
+              "code": "item_003",
+              "label": "Nasional"
+            },
+            {
+              "code": "item_004",
+              "label": "Provinsi/Regional"
+            }
+          ],
+          "code": "KL26-PASCA-02"
+        },
+        {
+          "name": "REALISASI JUMLAH PENGABDIAN MASYARAKAT TAHUN 2026",
+          "source_rows": "182-198",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Uraian",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-PASCA-03"
+        },
+        {
+          "name": "REALISASI KERJA SAMA 2026",
+          "source_rows": "199-208",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Nama kerja sama",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-PASCA-04"
+        }
+      ]
+    },
+    {
+      "sheet": "SPI",
+      "unit_code": "SPI",
+      "category_code": "KL26-SPI",
+      "category_name": "Kinerja Layanan 2026 - SPI",
+      "indicators": [
+        {
+          "name": "REALISASI KERJA SAMA 2026",
+          "source_rows": "1-8",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Uraian",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-SPI-01"
+        }
+      ]
+    },
+    {
+      "sheet": "LPPM",
+      "unit_code": "LPPM",
+      "category_code": "KL26-LPPM",
+      "category_name": "Kinerja Layanan 2026 - LPPM",
+      "indicators": [
+        {
+          "name": "REALISASI PENELITIAN TAHUN 2026",
+          "source_rows": "1-22",
+          "form_type": "FIXED",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Penelitian Pembinaan/Kapasitas"
+            },
+            {
+              "code": "item_002",
+              "label": "Penelitian Dasar Program Studi"
+            },
+            {
+              "code": "item_003",
+              "label": "Penelitian Dasar Interdisipliner"
+            },
+            {
+              "code": "item_004",
+              "label": "Penelitian Terapan Pengembangan Nasional"
+            },
+            {
+              "code": "item_005",
+              "label": "Penelitian Terapan Kajian Strategis Nasional"
+            },
+            {
+              "code": "item_006",
+              "label": "Penelitian Terapan Global/Internasional"
+            },
+            {
+              "code": "item_007",
+              "label": "Penelitian Pengembangan Pendidikan Tinggi"
+            },
+            {
+              "code": "item_008",
+              "label": "Penelitian Pengembangan Kolabirasi antar Perguruan Tinggi/ Kementerian/Lembaga"
+            },
+            {
+              "code": "item_009",
+              "label": "Penelitian Pengembangan Kolaborasi Internasional"
+            },
+            {
+              "code": "item_010",
+              "label": "Penelitian Pengembangan Kajian Keislaman"
+            },
+            {
+              "code": "item_011",
+              "label": "Peningkatan Kualitas Jurnal International Bereputasi"
+            },
+            {
+              "code": "item_012",
+              "label": "Peningkatan Kualitas Jurnal Nasional Terakreditasi"
+            },
+            {
+              "code": "item_013",
+              "label": "Pendampingan Rumah Jurnal"
+            },
+            {
+              "code": "item_014",
+              "label": "Penerbitan Buku Ajar"
+            },
+            {
+              "code": "item_015",
+              "label": "Pengabdian kepada Masyarakat berbasis Moderasi Beragama"
+            },
+            {
+              "code": "item_016",
+              "label": "Pengabdian kepada Masyarakat berbasis Pesantren dan Madrasah"
+            }
+          ],
+          "code": "KL26-LPPM-01"
+        },
+        {
+          "name": "REALISASI JUMLAH JURNAL TAHUN 2026",
+          "source_rows": "23-32",
+          "form_type": "FIXED",
+          "aggregation": "LAST",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Jurnal penelitian tidak terakreditasi"
+            },
+            {
+              "code": "item_002",
+              "label": "Jurnal penelitian Nasional terakreditasi"
+            },
+            {
+              "code": "item_003",
+              "label": "Jurnal penelitian internasional"
+            },
+            {
+              "code": "item_004",
+              "label": "Jurnal penelitian internasional bereputasi"
+            }
+          ],
+          "code": "KL26-LPPM-02"
+        },
+        {
+          "name": "REALISASI JUMLAH PENGABDIAN MASYARAKAT TAHUN 2026",
+          "source_rows": "33-42",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Uraian",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-LPPM-03"
+        },
+        {
+          "name": "REALISASI KERJA SAMA 2026",
+          "source_rows": "43-51",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Uraian",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-LPPM-04"
+        },
+        {
+          "name": "PUBLIKASI PENELITIAN",
+          "source_rows": "52-58",
+          "form_type": "FIXED",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Jumlah keluaran penelitian yang mendapat rekognisi internasional"
+            },
+            {
+              "code": "item_002",
+              "label": "Jumlah keluaran penelitian yang mendapat rekognisi nasional"
+            },
+            {
+              "code": "item_003",
+              "label": "Jumlah keluaran penelitian yang digunakan oleh industri/ masyarakat/ pemerintah"
+            }
+          ],
+          "code": "KL26-LPPM-05"
+        }
+      ]
+    },
+    {
+      "sheet": "LPM",
+      "unit_code": "LPM",
+      "category_code": "KL26-LPM",
+      "category_name": "Kinerja Layanan 2026 - LPM",
+      "indicators": [
+        {
+          "name": "REALISASI DATA AKRDITASI PRODI TAHUN 2026",
+          "source_rows": "1-49",
+          "form_type": "FIXED",
+          "aggregation": "LAST",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Akreditasi Universitas"
+            },
+            {
+              "code": "item_002",
+              "label": "S-1 Hukum Keluarga Islam (Ahwal Syakhshiyyah)"
+            },
+            {
+              "code": "item_003",
+              "label": "S-1 Akuntansi Syariah"
+            },
+            {
+              "code": "item_004",
+              "label": "S-1 Bimbingan dan Konseling Islam"
+            },
+            {
+              "code": "item_005",
+              "label": "S-1 Bisnis Digital"
+            },
+            {
+              "code": "item_006",
+              "label": "S-1 Desain Komunikasi Visual"
+            },
+            {
+              "code": "item_007",
+              "label": "S-1 Ekonomi Syariah"
+            },
+            {
+              "code": "item_008",
+              "label": "S-1 Hukum Ekonomi Syariah"
+            },
+            {
+              "code": "item_009",
+              "label": "S-1 Hukum Pidana Islam"
+            },
+            {
+              "code": "item_010",
+              "label": "S-1 Hukum Tata Negara (Siyasah)"
+            },
+            {
+              "code": "item_011",
+              "label": "S-1 Ilmu Al-Qur`an dan Tafsir"
+            },
+            {
+              "code": "item_012",
+              "label": "S-1 Komunikasi dan Penyiaran Islam"
+            },
+            {
+              "code": "item_013",
+              "label": "S-1 Manajemen Bisnis Syariah"
+            },
+            {
+              "code": "item_014",
+              "label": "S-1 Manajemen Dakwah"
+            },
+            {
+              "code": "item_015",
+              "label": "S-1 Manajemen Keuangan Syariah"
+            },
+            {
+              "code": "item_016",
+              "label": "S-1 Pendidikan Agama Islam"
+            },
+            {
+              "code": "item_017",
+              "label": "S-1 Pendidikan Bahasa Arab"
+            },
+            {
+              "code": "item_018",
+              "label": "S-1 Pendidikan Guru Madrasah Ibtidaiyah"
+            },
+            {
+              "code": "item_019",
+              "label": "S-1 Pendidikan Islam Anak Usia Dini"
+            },
+            {
+              "code": "item_020",
+              "label": "S-1 Pendidikan Matematika"
+            },
+            {
+              "code": "item_021",
+              "label": "S-1 Pengembangan Masyarakat Islam"
+            },
+            {
+              "code": "item_022",
+              "label": "S-1 Perbankan Syariah"
+            },
+            {
+              "code": "item_023",
+              "label": "S-1 Tadris Bahasa Indonesia"
+            },
+            {
+              "code": "item_024",
+              "label": "S-1 Tadris Bahasa Inggris"
+            },
+            {
+              "code": "item_025",
+              "label": "S-1 Tadris Biologi"
+            },
+            {
+              "code": "item_026",
+              "label": "S-1 Tadris Fisika"
+            },
+            {
+              "code": "item_027",
+              "label": "S-1 Tadris Kimia"
+            },
+            {
+              "code": "item_028",
+              "label": "S-1 Teknologi Informasi"
+            },
+            {
+              "code": "item_029",
+              "label": "S-2 Ekonomi Syariah"
+            },
+            {
+              "code": "item_030",
+              "label": "S-2 Hukum Keluarga Islam (Ahwal Syakhshiyyah)"
+            },
+            {
+              "code": "item_031",
+              "label": "S-2 Komunikasi dan Penyiaran Islam"
+            },
+            {
+              "code": "item_032",
+              "label": "S-2 Pendidikan Agama Islam"
+            },
+            {
+              "code": "item_033",
+              "label": "S-2 Pendidikan Dasar"
+            },
+            {
+              "code": "item_034",
+              "label": "S-2 Tadris Matematika"
+            },
+            {
+              "code": "item_035",
+              "label": "Profesi- Pendidikan Profesi Guru"
+            },
+            {
+              "code": "item_036",
+              "label": "S-3 Studi Islam"
+            },
+            {
+              "code": "item_037",
+              "label": "S-1 Pendidikan Olahraga"
+            },
+            {
+              "code": "item_038",
+              "label": "S-1 Manajemen Pendidikan Islam"
+            },
+            {
+              "code": "item_039",
+              "label": "S-1 Ilmu Hadis"
+            },
+            {
+              "code": "item_040",
+              "label": "S-2 Studi Islam"
+            },
+            {
+              "code": "item_041",
+              "label": "S-2 Pendidikan Bahasa Inggris"
+            },
+            {
+              "code": "item_042",
+              "label": "S-3 Pendidikan Agama Islam"
+            }
+          ],
+          "code": "KL26-LPM-01"
+        },
+        {
+          "name": "REALISASI REKAPITULASI AKREDITASI PRODI TAHUN 2026",
+          "source_rows": "50-64",
+          "form_type": "FIXED",
+          "aggregation": "LAST",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Jumlah Akreditasi Internasional"
+            },
+            {
+              "code": "item_002",
+              "label": "Akreditasi A/Unggul"
+            },
+            {
+              "code": "item_003",
+              "label": "Akreditasi Baik Sekali"
+            },
+            {
+              "code": "item_004",
+              "label": "Jumlah Akreditasi B"
+            },
+            {
+              "code": "item_005",
+              "label": "Akreditasi Baik"
+            },
+            {
+              "code": "item_006",
+              "label": "Terakreditasi Sementara"
+            },
+            {
+              "code": "item_007",
+              "label": "Terakreditasi Pertama"
+            },
+            {
+              "code": "item_008",
+              "label": "Jumlah Akreditasi C"
+            }
+          ],
+          "code": "KL26-LPM-02"
+        },
+        {
+          "name": "REALISASI PERSENTASE JUMLAH AKREDITASI TAHUN 2026",
+          "source_rows": "65-79",
+          "form_type": "FIXED",
+          "aggregation": "LAST",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Jumlah Akreditasi Internasional"
+            },
+            {
+              "code": "item_002",
+              "label": "Akreditasi A/Unggul"
+            },
+            {
+              "code": "item_003",
+              "label": "Akreditasi Baik Sekali"
+            },
+            {
+              "code": "item_004",
+              "label": "Jumlah Akrditasi B"
+            },
+            {
+              "code": "item_005",
+              "label": "Akreditasi Baik"
+            },
+            {
+              "code": "item_006",
+              "label": "Terakreditasi Sementara"
+            },
+            {
+              "code": "item_007",
+              "label": "Terakreditasi Pertama"
+            },
+            {
+              "code": "item_008",
+              "label": "Jumlah Akreditasi C"
+            }
+          ],
+          "code": "KL26-LPM-03"
+        },
+        {
+          "name": "REALISASI KERJA SAMA 2026",
+          "source_rows": "80-86",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Uraian",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-LPM-04"
+        }
+      ]
+    },
+    {
+      "sheet": "UPT MAHAD",
+      "unit_code": "UPT-MAHAD",
+      "category_code": "KL26-UPT-MAHAD",
+      "category_name": "Kinerja Layanan 2026 - UPT MAHAD",
+      "indicators": [
+        {
+          "name": "REALISASI KERJA SAMA 2026",
+          "source_rows": "1-8",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Uraian",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-UPT-MAHAD-01"
+        }
+      ]
+    },
+    {
+      "sheet": "UPT KARIER",
+      "unit_code": "UPT-KARIR",
+      "category_code": "KL26-UPT-KARIR",
+      "category_name": "Kinerja Layanan 2026 - UPT KARIER",
+      "indicators": [
+        {
+          "name": "REALISASI JUMLAH ALUMNI MELANJUTKAN PENDIDIKAN TAHUN 2026",
+          "source_rows": "1-43",
+          "form_type": "FIXED",
+          "aggregation": "LAST",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Pendidikan Agama Islam"
+            },
+            {
+              "code": "item_002",
+              "label": "Pendidikan Bahasa Arab"
+            },
+            {
+              "code": "item_003",
+              "label": "Tadris Bahasa Inggris"
+            },
+            {
+              "code": "item_004",
+              "label": "Tadris Matematika"
+            },
+            {
+              "code": "item_005",
+              "label": "Pend. Guru Madrasah Ibtidaiyah"
+            },
+            {
+              "code": "item_006",
+              "label": "Pendidikan Islam Anak Usia Dini"
+            },
+            {
+              "code": "item_007",
+              "label": "Pendidikan Kimia"
+            },
+            {
+              "code": "item_008",
+              "label": "Pendidikan Biologi"
+            },
+            {
+              "code": "item_009",
+              "label": "Pendidikan Fisika"
+            },
+            {
+              "code": "item_010",
+              "label": "Pendidikan Bahasa Indonesia"
+            },
+            {
+              "code": "item_011",
+              "label": "Pendidikan Profesi Guru"
+            },
+            {
+              "code": "item_012",
+              "label": "Fakultas Syari’ah dan Ilmu Hukum - Akhwal Syakhsiyyah"
+            },
+            {
+              "code": "item_013",
+              "label": "Fakultas Syari’ah dan Ilmu Hukum - Hukum Ekonomi Syari'ah"
+            },
+            {
+              "code": "item_014",
+              "label": "Fakultas Syari’ah dan Ilmu Hukum - Hukum Tata Negara (Siyasah)"
+            },
+            {
+              "code": "item_015",
+              "label": "Fakultas Syari’ah dan Ilmu Hukum - Ilmu Quran dan Tafsir"
+            },
+            {
+              "code": "item_016",
+              "label": "Fakultas Syari’ah dan Ilmu Hukum - Hukum Pidana Islam"
+            },
+            {
+              "code": "item_017",
+              "label": "Fakultas Dakwah dan Ilmu Komunikasi - Bimbingan dan Konseling Islam"
+            },
+            {
+              "code": "item_018",
+              "label": "Fakultas Dakwah dan Ilmu Komunikasi - Komunikasi dan Penyiaran Islam"
+            },
+            {
+              "code": "item_019",
+              "label": "Fakultas Dakwah dan Ilmu Komunikasi - Manajemen Dakwah"
+            },
+            {
+              "code": "item_020",
+              "label": "Fakultas Dakwah dan Ilmu Komunikasi - Pengembangan Masyarakat Islam"
+            },
+            {
+              "code": "item_021",
+              "label": "Fakultas Ekonomi dan Bisnis Islam - Ekonomi Syari'ah"
+            },
+            {
+              "code": "item_022",
+              "label": "Fakultas Ekonomi dan Bisnis Islam - Perbankan Syari'ah"
+            },
+            {
+              "code": "item_023",
+              "label": "Fakultas Ekonomi dan Bisnis Islam - Manajemen Keuangan Syari'ah"
+            },
+            {
+              "code": "item_024",
+              "label": "Fakultas Ekonomi dan Bisnis Islam - Akuntansi Syari'ah"
+            },
+            {
+              "code": "item_025",
+              "label": "Fakultas Ekonomi dan Bisnis Islam - Manajemen Bisnis Syari'ah"
+            },
+            {
+              "code": "item_026",
+              "label": "Pascasarjana Program Magister - Pendidikan Agama Islam"
+            },
+            {
+              "code": "item_027",
+              "label": "Pascasarjana Program Magister - Ekonomi Syari'ah"
+            },
+            {
+              "code": "item_028",
+              "label": "Pascasarjana Program Magister - Akhwal Syakhsiyyah"
+            },
+            {
+              "code": "item_029",
+              "label": "Pascasarjana Program Magister - Komunikasi dan Penyiaran Islam"
+            },
+            {
+              "code": "item_030",
+              "label": "Pascasarjana Program Magister - Tadris Matematika"
+            },
+            {
+              "code": "item_031",
+              "label": "Pascasarjana Program Magister - Pendidikan Dasar"
+            }
+          ],
+          "code": "KL26-UPT-KARIR-01"
+        },
+        {
+          "name": "REALISASI JUMLAH ALUMNI TAHUN 2026",
+          "source_rows": "44-56",
+          "form_type": "FIXED",
+          "aggregation": "LAST",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Lulus"
+            },
+            {
+              "code": "item_002",
+              "label": "Kerja"
+            },
+            {
+              "code": "item_003",
+              "label": "Wiraswasta"
+            },
+            {
+              "code": "item_004",
+              "label": "Melanjutkan Kuliah"
+            },
+            {
+              "code": "item_005",
+              "label": "Persentase Bekerja"
+            },
+            {
+              "code": "item_006",
+              "label": "Persentase Menunggu Kerja"
+            }
+          ],
+          "code": "KL26-UPT-KARIR-02"
+        },
+        {
+          "name": "REALISASI KERJA SAMA 2026",
+          "source_rows": "57-63",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Uraian",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-UPT-KARIR-03"
+        }
+      ]
+    },
+    {
+      "sheet": "UPT PERPUS",
+      "unit_code": "UPT-PERPUS",
+      "category_code": "KL26-UPT-PERPUS",
+      "category_name": "Kinerja Layanan 2026 - UPT PERPUS",
+      "indicators": [
+        {
+          "name": "REALISASI JUMLAH KOLEKSI INTI PERPUSTAKAAN BERDASARKAN JUDUL TAHUN 2026",
+          "source_rows": "1-45",
+          "form_type": "FIXED",
+          "aggregation": "LAST",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Pendidikan Agama Islam"
+            },
+            {
+              "code": "item_002",
+              "label": "Pendidikan Bahasa Arab"
+            },
+            {
+              "code": "item_003",
+              "label": "Tadris Bahasa Inggris"
+            },
+            {
+              "code": "item_004",
+              "label": "Tadris Matematika"
+            },
+            {
+              "code": "item_005",
+              "label": "Pendidikan Guru Madrasah Ibtidaiyah"
+            },
+            {
+              "code": "item_006",
+              "label": "Pendidikan Islam Anak Usia Dini"
+            },
+            {
+              "code": "item_007",
+              "label": "Tadris Fisika"
+            },
+            {
+              "code": "item_008",
+              "label": "Tadrsi Kimia"
+            },
+            {
+              "code": "item_009",
+              "label": "Tadris Biologi"
+            },
+            {
+              "code": "item_010",
+              "label": "Tadris Bahasa Indonesia"
+            },
+            {
+              "code": "item_011",
+              "label": "Akhwal Al-Syakhsiyah"
+            },
+            {
+              "code": "item_012",
+              "label": "Hukum Ekonomi Syariah"
+            },
+            {
+              "code": "item_013",
+              "label": "Hukum Tata Negara"
+            },
+            {
+              "code": "item_014",
+              "label": "Ilmu Al-Quran dan Tafsir"
+            },
+            {
+              "code": "item_015",
+              "label": "Hukum Pidana Islam"
+            },
+            {
+              "code": "item_016",
+              "label": "Perbankan Syariah"
+            },
+            {
+              "code": "item_017",
+              "label": "Ekonomi Syariah"
+            },
+            {
+              "code": "item_018",
+              "label": "Manajemen Zakat dan Waqaf"
+            },
+            {
+              "code": "item_019",
+              "label": "Manajemen Keuangan Syariah"
+            },
+            {
+              "code": "item_020",
+              "label": "Manajemen Bisnis Syariah"
+            },
+            {
+              "code": "item_021",
+              "label": "Akuntansi Syariah"
+            },
+            {
+              "code": "item_022",
+              "label": "Komunikasi Penyiaran Islam"
+            },
+            {
+              "code": "item_023",
+              "label": "Bimbingan Konseling Islam"
+            },
+            {
+              "code": "item_024",
+              "label": "Manajemen Dakwah"
+            },
+            {
+              "code": "item_025",
+              "label": "Pengembangan Masyarakat Islam"
+            },
+            {
+              "code": "item_026",
+              "label": "Pendidikan Profesi Guru"
+            },
+            {
+              "code": "item_027",
+              "label": "Teknologi Informasi"
+            },
+            {
+              "code": "item_028",
+              "label": "Desain Komunikasi Visual"
+            },
+            {
+              "code": "item_029",
+              "label": "Pendidikan Dasar"
+            },
+            {
+              "code": "item_030",
+              "label": "Ekonomi islam"
+            },
+            {
+              "code": "item_031",
+              "label": "Kependidikan Islam"
+            },
+            {
+              "code": "item_032",
+              "label": "Hukum Islam"
+            },
+            {
+              "code": "item_033",
+              "label": "Dakwah dan Komunikasi"
+            },
+            {
+              "code": "item_034",
+              "label": "Basyral Hamidy Harahap Corner"
+            },
+            {
+              "code": "item_035",
+              "label": "Asian Foundation Corner"
+            },
+            {
+              "code": "item_036",
+              "label": "BI Corner"
+            },
+            {
+              "code": "item_037",
+              "label": "Haidar Putra Daulay Corner"
+            },
+            {
+              "code": "item_038",
+              "label": "Umum"
+            }
+          ],
+          "code": "KL26-UPT-PERPUS-01"
+        },
+        {
+          "name": "REALISASI JUMLAH KOLEKSI INTI PERPUSTAKAAN BERDASARKAN EKSEMPLAR TAHUN 2026",
+          "source_rows": "46-90",
+          "form_type": "FIXED",
+          "aggregation": "LAST",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Pendidikan Agama Islam"
+            },
+            {
+              "code": "item_002",
+              "label": "Pendidikan Bahasa Arab"
+            },
+            {
+              "code": "item_003",
+              "label": "Tadris Bahasa Inggris"
+            },
+            {
+              "code": "item_004",
+              "label": "Tadris Matematika"
+            },
+            {
+              "code": "item_005",
+              "label": "Pendidikan Guru Madrasah Ibtidaiyah"
+            },
+            {
+              "code": "item_006",
+              "label": "Pendidikan Islam Anak Usia Dini"
+            },
+            {
+              "code": "item_007",
+              "label": "Tadris Fisika"
+            },
+            {
+              "code": "item_008",
+              "label": "Tadrsi Kimia"
+            },
+            {
+              "code": "item_009",
+              "label": "Tadris Biologi"
+            },
+            {
+              "code": "item_010",
+              "label": "Tadris Bahasa Indonesia"
+            },
+            {
+              "code": "item_011",
+              "label": "Akhwal Al-Syakhsiyah"
+            },
+            {
+              "code": "item_012",
+              "label": "Hukum Ekonomi Syariah"
+            },
+            {
+              "code": "item_013",
+              "label": "HUkum Tata Negara"
+            },
+            {
+              "code": "item_014",
+              "label": "Ilmu Al-Quran dan Tafsir"
+            },
+            {
+              "code": "item_015",
+              "label": "Hukum Pidana Islam"
+            },
+            {
+              "code": "item_016",
+              "label": "Perbankan Syariah"
+            },
+            {
+              "code": "item_017",
+              "label": "Ekonomi Syariah"
+            },
+            {
+              "code": "item_018",
+              "label": "Manajemen Zakat dan Waqaf"
+            },
+            {
+              "code": "item_019",
+              "label": "Manajemen Keuangan Syariah"
+            },
+            {
+              "code": "item_020",
+              "label": "Manajemen Bisnis Syariah"
+            },
+            {
+              "code": "item_021",
+              "label": "Akuntansi Syariah"
+            },
+            {
+              "code": "item_022",
+              "label": "Komunikasi Penyiaran Islam"
+            },
+            {
+              "code": "item_023",
+              "label": "Bimbingan Konseling Islam"
+            },
+            {
+              "code": "item_024",
+              "label": "Manajemen Dakwah"
+            },
+            {
+              "code": "item_025",
+              "label": "Pengembangan Masyarakat Islam"
+            },
+            {
+              "code": "item_026",
+              "label": "Pendidikan Profesi Guru"
+            },
+            {
+              "code": "item_027",
+              "label": "Teknologi Informasi"
+            },
+            {
+              "code": "item_028",
+              "label": "Desain Komunikasi Visual"
+            },
+            {
+              "code": "item_029",
+              "label": "Pendidikan Dasar"
+            },
+            {
+              "code": "item_030",
+              "label": "Ekonomi islam"
+            },
+            {
+              "code": "item_031",
+              "label": "Kependidikan islam"
+            },
+            {
+              "code": "item_032",
+              "label": "hukum islam"
+            },
+            {
+              "code": "item_033",
+              "label": "Dakwah dan komunikasi"
+            },
+            {
+              "code": "item_034",
+              "label": "Basyral Hamidy Harahap Corner"
+            },
+            {
+              "code": "item_035",
+              "label": "Asian Foundation Corner"
+            },
+            {
+              "code": "item_036",
+              "label": "BI Corner"
+            },
+            {
+              "code": "item_037",
+              "label": "Haidar Putra Daulay Corner"
+            },
+            {
+              "code": "item_038",
+              "label": "Umum"
+            }
+          ],
+          "code": "KL26-UPT-PERPUS-02"
+        },
+        {
+          "name": "REALISASI JUMLAH PENAMBAHAN KOLEKSI PERPUSTAKAAN TAHUN 2026",
+          "source_rows": "91-98",
+          "form_type": "FIXED",
+          "aggregation": "LAST",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Penambahan Judul"
+            },
+            {
+              "code": "item_002",
+              "label": "Penambahan EKsemplar"
+            }
+          ],
+          "code": "KL26-UPT-PERPUS-03"
+        },
+        {
+          "name": "REALISASI JUMLAH E-BOOK PERPUSTAKAAN BERDASARKAN JUDULTAHUN 2026",
+          "source_rows": "99-108",
+          "form_type": "FIXED",
+          "aggregation": "LAST",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Open Educational Resources (OER)"
+            },
+            {
+              "code": "item_002",
+              "label": "Digilib UIN Syahada Padangsidimpuan"
+            },
+            {
+              "code": "item_003",
+              "label": "Galeri Buku Digital"
+            }
+          ],
+          "code": "KL26-UPT-PERPUS-04"
+        },
+        {
+          "name": "REALISASI JUMLAH E-BOOK PERPUSTAKAAN BERDASARKAN EKSEMPLAR TAHUN 2026",
+          "source_rows": "109-136",
+          "form_type": "FIXED",
+          "aggregation": "LAST",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Open Educational Resources (OER)"
+            },
+            {
+              "code": "item_002",
+              "label": "Digilib UIN Syahada Padangsidimpuan"
+            },
+            {
+              "code": "item_003",
+              "label": "Galeri Buku Digital"
+            },
+            {
+              "code": "item_004",
+              "label": "Data Akses Sumber Digital Lainnya - Perpusnas RI"
+            },
+            {
+              "code": "item_005",
+              "label": "Data Akses Sumber Digital Lainnya - Moraref"
+            },
+            {
+              "code": "item_006",
+              "label": "Data Akses Sumber Digital Lainnya - Proquest"
+            },
+            {
+              "code": "item_007",
+              "label": "Data Akses Sumber Digital Lainnya - Research Repository"
+            },
+            {
+              "code": "item_008",
+              "label": "Data Akses Sumber Digital Lainnya - e-Theses"
+            },
+            {
+              "code": "item_009",
+              "label": "Data Akses Sumber Digital Lainnya - Garuda"
+            },
+            {
+              "code": "item_010",
+              "label": "Data Akses Sumber Digital Lainnya - Repositori Ilmiah Indonesia"
+            },
+            {
+              "code": "item_011",
+              "label": "Data Akses Sumber Digital Lainnya - Perpustakaan Islam Digital"
+            },
+            {
+              "code": "item_012",
+              "label": "Data Akses Sumber Digital Lainnya - BRIN"
+            },
+            {
+              "code": "item_013",
+              "label": "Data Akses Sumber Digital Lainnya - Jurnal Al-kuttab"
+            }
+          ],
+          "code": "KL26-UPT-PERPUS-05"
+        },
+        {
+          "name": "REALISASI KERJA SAMA 2026",
+          "source_rows": "137-143",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Uraian",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-UPT-PERPUS-06"
+        }
+      ]
+    },
+    {
+      "sheet": "UPT BISNIS",
+      "unit_code": "UPT-BISNIS",
+      "category_code": "KL26-UPT-BISNIS",
+      "category_name": "Kinerja Layanan 2026 - UPT BISNIS",
+      "indicators": [
+        {
+          "name": "REALISASI KERJA SAMA 2026",
+          "source_rows": "1-27",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Uraian",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-UPT-BISNIS-01"
+        },
+        {
+          "name": "REALISASI JUMLAH UNIT USAHA 2026",
+          "source_rows": "28-55",
+          "form_type": "FIXED",
+          "aggregation": "LAST",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "KSO Penyediaan Air Minum"
+            },
+            {
+              "code": "item_002",
+              "label": "KSO Jasa Layanan Laundry"
+            },
+            {
+              "code": "item_003",
+              "label": "KSO Percetakan"
+            },
+            {
+              "code": "item_004",
+              "label": "KSO Kantin Putri"
+            },
+            {
+              "code": "item_005",
+              "label": "KSO Kantin Putra"
+            },
+            {
+              "code": "item_006",
+              "label": "Sewa Lapak Wisuda"
+            },
+            {
+              "code": "item_007",
+              "label": "Sewa Tanah Bangunan Pendidikan dan Latihan a.n. Martua Hamonangan"
+            },
+            {
+              "code": "item_008",
+              "label": "Sewa Tanah Bangunan Pendidikan dan Latihan a.n. Ikhsan Habibi Hasibuan"
+            },
+            {
+              "code": "item_009",
+              "label": "Sewa Tanah Bangunan Pendidikan dan Latihan a.n. Lisna Iskandar"
+            },
+            {
+              "code": "item_010",
+              "label": "Sewa Tanah Bangunan Pendidikan dan Latihan a.n. Yanti Meimah"
+            },
+            {
+              "code": "item_011",
+              "label": "Sewa Gedung Bisnis Kantin putri"
+            },
+            {
+              "code": "item_012",
+              "label": "Sewa Gedung Bisnis An. Ikhsan Habibi"
+            },
+            {
+              "code": "item_013",
+              "label": "Sewa Tanah Kantin FTIK"
+            },
+            {
+              "code": "item_014",
+              "label": "Sewa Tanah Kantin FEBI"
+            },
+            {
+              "code": "item_015",
+              "label": "Sewa Tanah Kantin FDIK"
+            },
+            {
+              "code": "item_016",
+              "label": "Sewa Asrama Ma'had"
+            },
+            {
+              "code": "item_017",
+              "label": "Sewa Laboratorium"
+            },
+            {
+              "code": "item_018",
+              "label": "Sewa Auditorium"
+            },
+            {
+              "code": "item_019",
+              "label": "Sewa Cafetaria"
+            },
+            {
+              "code": "item_020",
+              "label": "Sewa Aula Gedung Terpadu"
+            },
+            {
+              "code": "item_021",
+              "label": "Sewa Bank Syariah Indonesia"
+            }
+          ],
+          "code": "KL26-UPT-BISNIS-02"
+        }
+      ]
+    },
+    {
+      "sheet": "UPT BAHASA",
+      "unit_code": "UPT-BAHASA",
+      "category_code": "KL26-UPT-BAHASA",
+      "category_name": "Kinerja Layanan 2026 - UPT BAHASA",
+      "indicators": [
+        {
+          "name": "REALISASI KERJA SAMA 2026",
+          "source_rows": "1-12",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Uraian",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-UPT-BAHASA-01"
+        }
+      ]
+    },
+    {
+      "sheet": "UPT TIPD",
+      "unit_code": "UPT-TIPD",
+      "category_code": "KL26-UPT-TIPD",
+      "category_name": "Kinerja Layanan 2026 - UPT TIPD",
+      "indicators": [
+        {
+          "name": "REALISASI KERJA SAMA 2026",
+          "source_rows": "1-8",
+          "form_type": "DYNAMIC",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
+          "fields": [
+            {
+              "code": "uraian",
+              "label": "Uraian",
+              "type": "TEXT",
+              "unit": "",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": null,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "NUMBER",
+              "unit": "",
+              "required": true,
+              "decimals": 2,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            }
+          ],
+          "items": [],
+          "code": "KL26-UPT-TIPD-01"
+        }
+      ]
+    }
+  ]
+}

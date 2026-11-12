@@ -36,7 +36,6 @@ class CompleteWorkbookSeeder extends Seeder
 
         DB::transaction(function () use ($fixture): void {
             $templateId = $this->seedWorkbookCoordinates($fixture);
-            $this->seedSummaryIndicators($fixture);
             $this->assertStoredCoordinates($templateId);
         });
     }

@@ -15,7 +15,9 @@ class AuthenticationTest extends TestCase
     {
         $response = $this->get(route('login'))
             ->assertOk()
-            ->assertSee('Masuk');
+            ->assertSee('Masuk')
+            ->assertSee('id="login-form"', false)
+            ->assertSee('event.currentTarget.requestSubmit()', false);
 
         $response->assertHeader('X-Content-Type-Options', 'nosniff')
             ->assertHeader('X-Frame-Options', 'SAMEORIGIN')

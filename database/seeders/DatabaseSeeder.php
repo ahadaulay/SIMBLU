@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             UnitSeeder::class,
             UnitAccountSeeder::class,
             Reporting2026Seeder::class,
+            Reporting2025DummySeeder::class,
             // CompleteWorkbookSeeder::class,
         ]);
     }

@@ -51,7 +51,7 @@
         <div class="p-3">{{ $records->links() }}</div>
     </section>
 
-    <div class="modal fade" id="assignmentModal" tabindex="-1" aria-labelledby="assignment-title" wire:ignore.self>
+    <div class="modal fade" id="assignmentModal" tabindex="-1" aria-labelledby="assignment-title" data-bs-backdrop="static" data-bs-keyboard="false" wire:ignore.self>
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">

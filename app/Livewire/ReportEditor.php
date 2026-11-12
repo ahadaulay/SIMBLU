@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\UnitReport;
+use App\Services\IndicatorCalculator;
 use App\Services\ReportWorkflow;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -12,6 +13,8 @@ use Illuminate\View\View;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use RuntimeException;
+use Throwable;
 
 class ReportEditor extends Component
 {
@@ -30,6 +33,12 @@ class ReportEditor extends Component
     public string $note = '';
 
     public ?int $noteEntryId = null;
+
+    public ?int $detailEntryId = null;
+
+    public ?int $detailRowIndex = null;
+
+    public array $detailDraft = [];
 
     public function boot(): void
     {
@@ -59,7 +68,7 @@ class ReportEditor extends Component
         abort_unless($entry->definition['form_type'] === 'DYNAMIC', 403);
         if (count($this->sections[$entryId]['rows']) < 500) {
             $this->sections[$entryId]['no_activity'] = false;
-            $this->sections[$entryId]['rows'][] = ['key' => (string) Str::uuid(), 'label' => '', 'values' => array_fill_keys(array_column($entry->definition['fields'], 'code'), null)];
+            $this->sections[$entryId]['rows'][] = ['key' => (string) Str::uuid(), 'label' => '', 'values' => array_fill_keys(array_column($entry->definition['fields'], 'code'), null), 'details' => []];
         }
     }
 
@@ -70,6 +79,87 @@ class ReportEditor extends Component
         abort_unless($report->entries()->findOrFail($entryId)->definition['form_type'] === 'DYNAMIC', 403);
         unset($this->sections[$entryId]['rows'][$index]);
         $this->sections[$entryId]['rows'] = array_values($this->sections[$entryId]['rows']);
+    }
+
+    public function openDetails(int $entryId, int $rowIndex): void
+    {
+        $report = UnitReport::with('entries')->findOrFail($this->reportId);
+        Gate::authorize('reporting-view', $report);
+        $entry = $report->entries->firstWhere('id', $entryId);
+        abort_unless($entry && app(IndicatorCalculator::class)->detailField($entry->definition), 404);
+        abort_unless(isset($this->sections[$entryId]['rows'][$rowIndex]), 404);
+
+        $this->detailEntryId = $entryId;
+        $this->detailRowIndex = $rowIndex;
+        $this->detailDraft = $this->sections[$entryId]['rows'][$rowIndex]['details'] ?? [];
+        $this->resetValidation();
+        $this->dispatch('open-report-detail-modal');
+    }
+
+    public function addDetailRow(ReportWorkflow $workflow): void
+    {
+        $report = UnitReport::findOrFail($this->reportId);
+        $workflow->assertEditable($report);
+        $this->assertDetailSelection($report);
+
+        if (count($this->detailDraft) < 500) {
+            $this->detailDraft[] = ['name' => '', 'amount' => null];
+        }
+    }
+
+    public function removeDetailRow(int $index, ReportWorkflow $workflow): void
+    {
+        $report = UnitReport::findOrFail($this->reportId);
+        $workflow->assertEditable($report);
+        $this->assertDetailSelection($report);
+        abort_unless(isset($this->detailDraft[$index]), 404);
+        unset($this->detailDraft[$index]);
+        $this->detailDraft = array_values($this->detailDraft);
+    }
+
+    public function saveDetails(ReportWorkflow $workflow): void
+    {
+        $report = UnitReport::findOrFail($this->reportId);
+        $workflow->assertEditable($report);
+        $this->assertDetailSelection($report);
+        $this->validate([
+            'detailDraft' => ['array', 'max:500'],
+            'detailDraft.*.name' => ['required', 'string', 'max:255'],
+            'detailDraft.*.amount' => ['required', 'numeric', 'between:0,999999999999'],
+        ], [
+            'detailDraft.*.name.required' => 'Nama detail wajib diisi.',
+            'detailDraft.*.amount.required' => 'Jumlah detail wajib diisi.',
+            'detailDraft.*.amount.numeric' => 'Jumlah detail harus berupa angka.',
+        ]);
+
+        $entry = $report->entries()->findOrFail($this->detailEntryId);
+        $field = app(IndicatorCalculator::class)->detailField($entry->definition);
+        $values = $this->sections[$entry->id]['rows'][$this->detailRowIndex]['values'];
+        $target = app(IndicatorCalculator::class)->fieldValue($field, $values);
+        $total = collect($this->detailDraft)->sum(fn ($detail) => (float) $detail['amount']);
+
+        if ($this->detailDraft !== []
+            && (! is_numeric($target)
+                || round($total, (int) $field['decimals']) !== round((float) $target, (int) $field['decimals']))) {
+            $this->addError('detailDraft', 'Total detail harus sama dengan nilai utama pada uraian.');
+
+            return;
+        }
+
+        $this->sections[$entry->id]['rows'][$this->detailRowIndex]['details'] = array_map(fn ($detail) => [
+            'name' => trim($detail['name']),
+            'amount' => (float) $detail['amount'],
+        ], $this->detailDraft);
+        $this->resetValidation();
+        $this->dispatch('close-report-detail-modal');
+    }
+
+    private function assertDetailSelection(UnitReport $report): void
+    {
+        abort_unless($this->detailEntryId !== null && $this->detailRowIndex !== null, 404);
+        $entry = $report->entries()->findOrFail($this->detailEntryId);
+        abort_unless(app(IndicatorCalculator::class)->detailField($entry->definition), 404);
+        abort_unless(isset($this->sections[$entry->id]['rows'][$this->detailRowIndex]), 404);
     }
 
     public function save(ReportWorkflow $workflow): void
@@ -145,14 +235,14 @@ class ReportEditor extends Component
                 $report->entries()->findOrFail($entryId);
                 $path = $file->store('reporting/'.$report->id, 'local');
                 if (! $path) {
-                    throw new \RuntimeException('Lampiran gagal disimpan.');
+                    throw new RuntimeException('Lampiran gagal disimpan.');
                 }
                 $report->attachments()->create(['entry_id' => $entryId, 'uploaded_by' => auth()->id(), 'name' => Str::limit(basename($file->getClientOriginalName()), 240, ''), 'path' => $path, 'mime_type' => $file->getMimeType(), 'size' => $file->getSize()]);
                 $report->increment('version');
                 $workflow->history($report, $report->status, 'Lampiran ditambahkan.');
                 $this->version = $report->version;
             });
-        } catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             if ($path) {
                 Storage::disk('local')->delete($path);
             }
@@ -167,7 +257,45 @@ class ReportEditor extends Component
         $report = UnitReport::with(['unit', 'period', 'entries', 'attachments', 'notes.user'])->findOrFail($this->reportId);
         Gate::authorize('reporting-view', $report);
         $editable = auth()->user()->hasReportingRole(['UNIT']) && in_array($report->status, ['DRAFT', 'REVISION']) && $report->period->status === 'OPEN';
+        $selectedDetail = null;
 
-        return view('livewire.report-editor', ['report' => $report, 'editable' => $editable, 'histories' => $report->histories()->with('user')->latest('id')->limit(30)->get(), 'completion' => app(ReportWorkflow::class)->completion($report)]);
+        if ($this->detailEntryId !== null && $this->detailRowIndex !== null) {
+            $entry = $report->entries->firstWhere('id', $this->detailEntryId);
+            $row = $this->sections[$this->detailEntryId]['rows'][$this->detailRowIndex] ?? null;
+            $field = $entry ? app(IndicatorCalculator::class)->detailField($entry->definition) : null;
+
+            if ($entry && $row && $field) {
+                $details = $this->detailDraft;
+                $total = collect($details)->sum(
+                    fn ($detail) => is_array($detail) && is_numeric($detail['amount'] ?? null)
+                        ? (float) $detail['amount']
+                        : 0
+                );
+                $complete = collect($details)->every(
+                    fn ($detail) => is_array($detail)
+                        && filled($detail['name'] ?? null)
+                        && is_numeric($detail['amount'] ?? null)
+                );
+                $target = app(IndicatorCalculator::class)->fieldValue($field, $row['values']);
+                $totalsMatch = is_numeric($target)
+                    && round((float) $total, (int) $field['decimals'])
+                        === round((float) $target, (int) $field['decimals']);
+                $selectedDetail = [
+                    'entry_id' => $entry->id,
+                    'row_index' => $this->detailRowIndex,
+                    'label' => $row['label'],
+                    'field' => $field,
+                    'target' => $target,
+                    'total' => $total,
+                    'details' => $details,
+                    'can_finish' => $details === [] || ($complete && $totalsMatch),
+                    'message' => ! $complete
+                        ? 'Lengkapi nama dan jumlah pada seluruh baris detail.'
+                        : 'Total detail belum sama dengan nilai utama.',
+                ];
+            }
+        }
+
+        return view('livewire.report-editor', ['report' => $report, 'editable' => $editable, 'histories' => $report->histories()->with('user')->latest('id')->limit(30)->get(), 'completion' => app(ReportWorkflow::class)->completion($report), 'selectedDetail' => $selectedDetail]);
     }
 }

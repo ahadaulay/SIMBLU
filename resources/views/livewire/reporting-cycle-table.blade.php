@@ -127,7 +127,7 @@
         <div class="p-3">{{ $cycles->links() }}</div>
     </section>
 
-    <div class="modal fade" id="cycleModal" tabindex="-1" aria-labelledby="cycle-title" wire:ignore.self>
+    <div class="modal fade" id="cycleModal" tabindex="-1" aria-labelledby="cycle-title" data-bs-backdrop="static" data-bs-keyboard="false" wire:ignore.self>
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -169,7 +169,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="cycleDetailModal" tabindex="-1" aria-labelledby="cycle-detail-title" wire:ignore.self>
+    <div class="modal fade" id="cycleDetailModal" tabindex="-1" aria-labelledby="cycle-detail-title" data-bs-backdrop="static" data-bs-keyboard="false" wire:ignore.self>
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">

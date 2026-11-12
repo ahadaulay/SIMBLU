@@ -172,6 +172,62 @@ class ReportingTest extends TestCase
         Livewire::test(ReportEditor::class, ['reportId' => $report->id])->call('save')->assertForbidden();
     }
 
+    public function test_optional_row_details_must_match_the_main_total_on_submit(): void
+    {
+        $this->indicator->update([
+            'form_type' => 'FIXED',
+            'items' => [
+                ['code' => 'lokal', 'label' => 'Lokal'],
+                ['code' => 'internasional', 'label' => 'Internasional'],
+            ],
+        ]);
+        $report = $this->start();
+        $entry = $report->entries()->firstOrFail();
+        $path = 'sections.'.$entry->id.'.rows.0';
+
+        $component = Livewire::test(ReportEditor::class, ['reportId' => $report->id])
+            ->assertSee('Lokal')
+            ->set($path.'.values.amount', 3)
+            ->set('sections.'.$entry->id.'.rows.1.values.amount', 0)
+            ->call('openDetails', $entry->id, 0)
+            ->assertDispatched('open-report-detail-modal')
+            ->call('addDetailRow')
+            ->set('detailDraft.0.amount', '')
+            ->assertSee('Lengkapi nama dan jumlah pada seluruh baris detail.')
+            ->set('detailDraft.0.name', 'Prestasi A')
+            ->set('detailDraft.0.amount', 1)
+            ->assertSee('Total detail belum sama dengan nilai utama.')
+            ->assertSee('aria-disabled="true"', false);
+
+        $component->call('saveDetails')
+            ->assertHasErrors('detailDraft')
+            ->assertSet($path.'.details', [])
+            ->call('openDetails', $entry->id, 0)
+            ->assertSet('detailDraft', [])
+            ->call('addDetailRow')
+            ->set('detailDraft.0.name', 'Prestasi A')
+            ->set('detailDraft.0.amount', 3)
+            ->assertDontSee('Total detail belum sama dengan nilai utama.')
+            ->assertSee('aria-disabled="false"', false)
+            ->call('saveDetails')
+            ->assertHasNoErrors()
+            ->assertDispatched('close-report-detail-modal')
+            ->assertSet($path.'.details.0.name', 'Prestasi A')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $component->set($path.'.details.0.amount', 1)
+            ->call('submit')
+            ->assertHasErrors($path.'.details')
+            ->set($path.'.details.0.amount', 3)
+            ->call('submit')
+            ->assertHasNoErrors();
+
+        $details = $entry->fresh()->rows[0]['details'];
+        $this->assertSame('Prestasi A', $details[0]['name']);
+        $this->assertEquals(3, $details[0]['amount']);
+    }
+
     public function test_revision_verification_reopening_and_snapshots(): void
     {
         $report = $this->verified($this->period, 10);

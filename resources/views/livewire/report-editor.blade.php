@@ -63,6 +63,7 @@
     @endif
     @foreach($report->entries as $entry)
         @php($definition = $entry->definition)
+        @php($detailField = app(\App\Services\IndicatorCalculator::class)->detailField($definition))
         <section class="card p-3 report-entry" wire:key="entry-{{ $entry->id }}">
             <h5 class="report-entry-title d-flex justify-content-between align-items-baseline gap-3">
                 <span>{{ $loop->iteration }}. {{ $definition['name'] }}</span>
@@ -83,6 +84,9 @@
                                         <th>{{ $field['label'] }} {{ $field['required'] ? '*' : '' }}<small class="d-block">{{ $field['unit'] }}</small>
                                         </th>
                                     @endforeach
+                                    @if($detailField)
+                                        <th>Detail <small class="d-block">Opsional</small></th>
+                                    @endif
                                     @if($editable && $definition['form_type'] === 'DYNAMIC')
                                         <th>Aksi</th>
                                     @endif
@@ -105,7 +109,7 @@
                                             <td style="min-width:160px">
                                                 <label class="visually-hidden" for="{{ $inputId }}">{{ $field['label'] }} — {{ $row['label'] }}</label>
                                                 @if($field['type'] === 'CALCULATED')
-                                                    <output id="{{ $inputId }}">{{ $row['values'][$field['code']] ?? '—' }}</output>
+                                                    <output id="{{ $inputId }}">{{ app(\App\Services\IndicatorCalculator::class)->fieldValue($field, $row['values']) ?? '—' }}</output>
                                                     <small class="text-muted d-block">Dihitung saat simpan</small>
                                                 @elseif($field['type'] === 'CHOICE')
                                                     <select id="{{ $inputId }}" class="form-select" wire:model="{{ $path }}">
@@ -128,6 +132,16 @@
                                                 @enderror
                                             </td>
                                         @endforeach
+                                        @if($detailField)
+                                            <td style="min-width:130px">
+                                                <a href="#" class="btn btn-sm btn-outline-primary" role="button" wire:click.prevent="openDetails({{ $entry->id }},{{ $index }})">
+                                                    Detail{{ count($row['details'] ?? []) ? ' ('.count($row['details']).')' : '' }}
+                                                </a>
+                                                @error('sections.'.$entry->id.'.rows.'.$index.'.details')
+                                                    <div class="text-danger small mt-1">{{ $message }}</div>
+                                                @enderror
+                                            </td>
+                                        @endif
                                         @if($editable && $definition['form_type'] === 'DYNAMIC')
                                             <td>
                                                 <button type="button" class="btn btn-sm btn-outline-danger" wire:click="removeRow({{ $entry->id }},{{ $index }})" wire:confirm="Hapus baris dari draf ini?">Hapus</button>
@@ -177,6 +191,90 @@
                 </div>
             </section>
         @endforeach
+        <div class="modal fade" id="reportDetailModal" tabindex="-1" aria-labelledby="report-detail-title" data-bs-backdrop="static" data-bs-keyboard="false" wire:ignore.self>
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div>
+                            <h5 class="modal-title" id="report-detail-title">Detail {{ $selectedDetail['label'] ?? '' }}</h5>
+                            <small class="text-muted">Opsional. Jika diisi, total detail harus sama dengan nilai utama saat laporan diajukan.</small>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                    </div>
+                    <div class="modal-body">
+                        @if($selectedDetail)
+                            <div class="table-responsive">
+                                <table class="table table-bordered align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>Nama</th>
+                                            <th>Jumlah</th>
+                                            @if($editable)<th>Aksi</th>@endif
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($selectedDetail['details'] as $detailIndex => $detail)
+                                            <tr wire:key="detail-{{ $selectedDetail['entry_id'] }}-{{ $selectedDetail['row_index'] }}-{{ $detailIndex }}">
+                                                <td>
+                                                    <label class="visually-hidden" for="detail-name-{{ $detailIndex }}">Nama detail</label>
+                                                    <input id="detail-name-{{ $detailIndex }}" class="form-control" type="text" wire:model="detailDraft.{{ $detailIndex }}.name" @disabled(!$editable)>
+                                                    @error('detailDraft.'.$detailIndex.'.name')<div class="text-danger small">{{ $message }}</div>@enderror
+                                                </td>
+                                                <td>
+                                                    <label class="visually-hidden" for="detail-amount-{{ $detailIndex }}">Jumlah detail</label>
+                                                    <input id="detail-amount-{{ $detailIndex }}" class="form-control" type="number" min="0" step="any" wire:model.live.debounce.300ms="detailDraft.{{ $detailIndex }}.amount" @disabled(!$editable)>
+                                                    @error('detailDraft.'.$detailIndex.'.amount')<div class="text-danger small">{{ $message }}</div>@enderror
+                                                </td>
+                                                @if($editable)
+                                                    <td><button type="button" class="btn btn-sm btn-outline-danger" wire:click="removeDetailRow({{ $detailIndex }})">Hapus</button></td>
+                                                @endif
+                                            </tr>
+                                        @empty
+                                            <tr><td colspan="{{ $editable ? 3 : 2 }}" class="text-center text-muted">Belum ada detail.</td></tr>
+                                        @endforelse
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th>Total detail</th>
+                                            <th>{{ number_format((float) $selectedDetail['total'], (int) $selectedDetail['field']['decimals'], ',', '.') }}</th>
+                                            @if($editable)<th></th>@endif
+                                        </tr>
+                                        <tr>
+                                            <th>Nilai utama</th>
+                                            <th>{{ is_numeric($selectedDetail['target']) ? number_format((float) $selectedDetail['target'], (int) $selectedDetail['field']['decimals'], ',', '.') : 'Belum diisi' }}</th>
+                                            @if($editable)<th></th>@endif
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                            @if($selectedDetail['details'] !== [] && !$selectedDetail['can_finish'])
+                                <div class="alert alert-warning" role="alert">
+                                    {{ $selectedDetail['message'] }}
+                                </div>
+                            @endif
+                            @error('detailDraft')<div class="alert alert-danger" role="alert">{{ $message }}</div>@enderror
+                            @if($editable)
+                                <button type="button" class="btn btn-outline-primary" wire:click="addDetailRow">Tambah baris</button>
+                            @endif
+                        @endif
+                    </div>
+                    <div class="modal-footer">
+                        @if($editable)
+                            <button
+                                id="finish-report-detail"
+                                type="button"
+                                class="btn btn-primary"
+                                aria-disabled="{{ ($selectedDetail['can_finish'] ?? true) ? 'false' : 'true' }}"
+                                @disabled(!($selectedDetail['can_finish'] ?? true))
+                                wire:click="saveDetails"
+                            >Simpan</button>
+                        @else
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Tutup</button>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
         @if($editable)
             <div class="d-flex gap-3 mb-4">
                 <button class="btn btn-outline-primary" wire:click="save" wire:loading.attr="disabled">Simpan draf</button>
@@ -261,4 +359,15 @@
                 </table>
             </div>
         </section>
+        @script
+            <script>
+                $wire.on('open-report-detail-modal', () => {
+                    bootstrap.Modal.getOrCreateInstance(document.getElementById('reportDetailModal')).show();
+                });
+
+                $wire.on('close-report-detail-modal', () => {
+                    bootstrap.Modal.getOrCreateInstance(document.getElementById('reportDetailModal')).hide();
+                });
+            </script>
+        @endscript
     </div>

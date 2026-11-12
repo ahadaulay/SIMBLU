@@ -73,7 +73,7 @@
         </div>
         <div class="p-3">{{ $records->links() }}</div>
     </section>
-    <div class="modal fade" id="periodModal" tabindex="-1" aria-labelledby="periodModalTitle" wire:ignore.self>
+    <div class="modal fade" id="periodModal" tabindex="-1" aria-labelledby="periodModalTitle" data-bs-backdrop="static" data-bs-keyboard="false" wire:ignore.self>
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">

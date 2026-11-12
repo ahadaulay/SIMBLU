@@ -79,7 +79,7 @@
         </div>
         <div class="p-3">{{ $records->links() }}</div>
     </div>
-    <div class="modal fade" id="indicatorModal" tabindex="-1" aria-labelledby="indicator-title" wire:ignore.self>
+    <div class="modal fade" id="indicatorModal" tabindex="-1" aria-labelledby="indicator-title" data-bs-backdrop="static" data-bs-keyboard="false" wire:ignore.self>
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">

@@ -64,6 +64,42 @@ class IndicatorCalculator
         return array_values(array_unique(array_filter(array_map('trim', preg_split('/\R/', $field['options'] ?? '')))));
     }
 
+    public function detailField(array $definition): ?array
+    {
+        foreach ($definition['fields'] as $field) {
+            if ($field['code'] === $definition['result_field']
+                && in_array($field['type'], ['NUMBER', 'CALCULATED'], true)) {
+                return $field;
+            }
+        }
+
+        return null;
+    }
+
+    public function fieldValue(array $field, array $values): mixed
+    {
+        if ($field['type'] !== 'CALCULATED') {
+            return $values[$field['code']] ?? null;
+        }
+
+        $inputs = array_map(fn ($key) => $values[$key] ?? null, $this->operands($field));
+
+        if (count(array_filter($inputs, 'is_numeric')) !== count($inputs)) {
+            return null;
+        }
+
+        $inputs = array_map('floatval', $inputs);
+
+        return match ($field['operation']) {
+            'SUM' => array_sum($inputs),
+            'DIFFERENCE' => $inputs[0] - $inputs[1],
+            'PRODUCT' => array_product($inputs),
+            'RATIO', 'PERCENT' => $inputs[1] == 0
+                ? null
+                : $inputs[0] / $inputs[1] * ($field['operation'] === 'PERCENT' ? 100 : 1),
+        };
+    }
+
     private function operands(array $field): array
     {
         return array_map('trim', explode(',', $field['operands'] ?? ''));
@@ -88,6 +124,9 @@ class IndicatorCalculator
             'rows.*.key' => ['required', 'string', 'max:50', 'distinct'],
             'rows.*.label' => [$complete ? 'required' : 'nullable', 'string', 'max:255'],
             'rows.*.values' => ['present', 'array'],
+            'rows.*.details' => ['sometimes', 'array', 'max:500'],
+            'rows.*.details.*.name' => [$complete ? 'required' : 'nullable', 'string', 'max:255'],
+            'rows.*.details.*.amount' => [$complete ? 'required' : 'nullable', 'numeric', 'between:0,999999999999'],
         ])->validate();
         $normalized = [];
         foreach ($rows as $index => $row) {
@@ -99,18 +138,9 @@ class IndicatorCalculator
                     $value = null;
                 }
                 if ($field['type'] === 'CALCULATED') {
-                    $inputs = array_map(fn ($key) => $values[$key] ?? null, $this->operands($field));
-                    $value = null;
-                    if (! in_array(null, $inputs, true)) {
-                        $value = match ($field['operation']) {
-                            'SUM' => array_sum($inputs),
-                            'DIFFERENCE' => $inputs[0] - $inputs[1],
-                            'PRODUCT' => array_product($inputs),
-                            'RATIO', 'PERCENT' => $inputs[1] == 0 ? null : $inputs[0] / $inputs[1] * ($field['operation'] === 'PERCENT' ? 100 : 1),
-                        };
-                        if ($value === null && $complete) {
-                            throw ValidationException::withMessages(['rows.'.$index.'.values.'.$code => 'Penyebut nol; hasil tidak dapat dihitung.']);
-                        }
+                    $value = $this->fieldValue($field, $values);
+                    if ($value === null && $complete) {
+                        throw ValidationException::withMessages(['rows.'.$index.'.values.'.$code => 'Hasil tidak dapat dihitung. Periksa seluruh nilai sumber.']);
                     }
                 }
                 $rules = [$complete && $field['required'] ? 'required' : 'nullable'];
@@ -131,7 +161,30 @@ class IndicatorCalculator
                 Validator::make(['rows' => [$index => ['values' => [$code => $value]]]], ['rows.'.$index.'.values.'.$code => $rules])->validate();
                 $values[$code] = $value !== null && in_array($field['type'], ['NUMBER', 'CALCULATED']) ? round((float) $value, (int) $field['decimals']) : $value;
             }
-            $normalized[] = ['key' => $row['key'], 'label' => $dynamic ? $row['label'] : $expected[$index]['label'], 'values' => $values];
+            $details = array_map(fn (array $detail) => [
+                'name' => trim((string) ($detail['name'] ?? '')),
+                'amount' => ($detail['amount'] ?? '') === '' ? null : (float) $detail['amount'],
+            ], $row['details'] ?? []);
+
+            if ($complete && $details !== []) {
+                $detailField = $this->detailField($definition);
+                $target = $detailField ? ($values[$detailField['code']] ?? null) : null;
+                $total = array_sum(array_column($details, 'amount'));
+                $decimals = (int) ($detailField['decimals'] ?? 2);
+
+                if (! is_numeric($target) || round($total, $decimals) !== round((float) $target, $decimals)) {
+                    throw ValidationException::withMessages([
+                        'rows.'.$index.'.details' => 'Total detail harus sama dengan nilai utama pada uraian.',
+                    ]);
+                }
+            }
+
+            $normalized[] = [
+                'key' => $row['key'],
+                'label' => $dynamic ? $row['label'] : $expected[$index]['label'],
+                'values' => $values,
+                'details' => $details,
+            ];
         }
 
         return $normalized;

@@ -48,7 +48,7 @@
                 </tbody>
             </table>
         </div>{{ $records->links() }}</div>
-        <div class="modal fade" id="assignmentModal" tabindex="-1" aria-labelledby="assignment-title" wire:ignore.self>
+        <div class="modal fade" id="assignmentModal" tabindex="-1" aria-labelledby="assignment-title" data-bs-backdrop="static" data-bs-keyboard="false" wire:ignore.self>
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">

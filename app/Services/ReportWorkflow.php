@@ -69,6 +69,7 @@ class ReportWorkflow
                         array_column($definition['fields'], 'code'),
                         null,
                     ),
+                    'details' => [],
                 ],
                 $items,
             );

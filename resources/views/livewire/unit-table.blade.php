@@ -74,7 +74,7 @@
         </div>
         <div class="p-3">{{ $records->links() }}</div>
     </section>
-    <div class="modal fade" id="unitModal" tabindex="-1" aria-labelledby="unitModalTitle" wire:ignore.self>
+    <div class="modal fade" id="unitModal" tabindex="-1" aria-labelledby="unitModalTitle" data-bs-backdrop="static" data-bs-keyboard="false" wire:ignore.self>
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">

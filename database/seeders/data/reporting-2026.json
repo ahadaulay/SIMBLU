@@ -1079,38 +1079,122 @@
         {
           "name": "REALISASI DATA JUMLAH PRESTASI MAHASISWA PERPRODI TAHUN 2026",
           "source_rows": "1-264",
-          "form_type": "DYNAMIC",
-          "aggregation": "DISTINCT",
-          "result_field": "uraian",
+          "form_type": "FIXED",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
           "fields": [
             {
-              "code": "program_studi",
-              "label": "Program studi",
-              "type": "CHOICE",
-              "unit": "",
-              "required": true,
-              "decimals": 0,
-              "operation": "SUM",
-              "operands": "",
-              "options": "Pendidikan Agama Islam\nPendidikan Bahasa Arab\nTadris Bahasa Inggris\nPendidikan Matematika\nPend. Guru Madrasah Ibtidaiyah (PGMI)\nPendidikan Islam Anak Usia Dini\nTadris Kimia\nTadris Biologi\nTadris Fisika\nTadris Bahasa Indonesia\nTeknologi Informasi",
-              "min": null,
-              "max": null
-            },
-            {
-              "code": "uraian",
-              "label": "Nama mahasiswa dan prestasi",
-              "type": "TEXT",
-              "unit": "",
+              "code": "lokal",
+              "label": "Lokal",
+              "type": "NUMBER",
+              "unit": "orang",
               "required": true,
               "decimals": 0,
               "operation": "SUM",
               "operands": "",
               "options": "",
-              "min": null,
+              "min": 0,
+              "max": null
+            },
+            {
+              "code": "regional",
+              "label": "Regional",
+              "type": "NUMBER",
+              "unit": "orang",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            },
+            {
+              "code": "nasional",
+              "label": "Nasional",
+              "type": "NUMBER",
+              "unit": "orang",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            },
+            {
+              "code": "internasional",
+              "label": "Internasional",
+              "type": "NUMBER",
+              "unit": "orang",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "CALCULATED",
+              "unit": "orang",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "lokal,regional,nasional,internasional",
+              "options": "",
+              "min": 0,
               "max": null
             }
           ],
-          "items": [],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Pendidikan Agama Islam"
+            },
+            {
+              "code": "item_002",
+              "label": "Pendidikan Bahasa Arab"
+            },
+            {
+              "code": "item_003",
+              "label": "Tadris Bahasa Inggris"
+            },
+            {
+              "code": "item_004",
+              "label": "Pendidikan Matematika"
+            },
+            {
+              "code": "item_005",
+              "label": "Pend. Guru Madrasah Ibtidaiyah (PGMI)"
+            },
+            {
+              "code": "item_006",
+              "label": "Pendidikan Islam Anak Usia Dini"
+            },
+            {
+              "code": "item_007",
+              "label": "Tadris Kimia"
+            },
+            {
+              "code": "item_008",
+              "label": "Tadris Biologi"
+            },
+            {
+              "code": "item_009",
+              "label": "Tadris Fisika"
+            },
+            {
+              "code": "item_010",
+              "label": "Tadris Bahasa Indonesia"
+            },
+            {
+              "code": "item_011",
+              "label": "Teknologi Informasi"
+            }
+          ],
           "code": "KL26-FTIK-01"
         },
         {
@@ -1239,38 +1323,98 @@
         {
           "name": "REALISASI DATA JUMLAH PRESTASI MAHASISWA PERPRODI TAHUN 2026",
           "source_rows": "1-147",
-          "form_type": "DYNAMIC",
-          "aggregation": "DISTINCT",
-          "result_field": "uraian",
+          "form_type": "FIXED",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
           "fields": [
             {
-              "code": "program_studi",
-              "label": "Program studi",
-              "type": "CHOICE",
-              "unit": "",
-              "required": true,
-              "decimals": 0,
-              "operation": "SUM",
-              "operands": "",
-              "options": "Hukum Keluarga Islam (Ahwal Syakhshiyyah)\nHukum Ekonomi Syariah\nHukum Tata Negara (Siyasah)\nIlmu Al-Qur'an dan Tafsir\nHukum Pidana Islam",
-              "min": null,
-              "max": null
-            },
-            {
-              "code": "uraian",
-              "label": "Nama mahasiswa dan prestasi",
-              "type": "TEXT",
-              "unit": "",
+              "code": "lokal",
+              "label": "Lokal",
+              "type": "NUMBER",
+              "unit": "orang",
               "required": true,
               "decimals": 0,
               "operation": "SUM",
               "operands": "",
               "options": "",
-              "min": null,
+              "min": 0,
+              "max": null
+            },
+            {
+              "code": "regional",
+              "label": "Regional",
+              "type": "NUMBER",
+              "unit": "orang",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            },
+            {
+              "code": "nasional",
+              "label": "Nasional",
+              "type": "NUMBER",
+              "unit": "orang",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            },
+            {
+              "code": "internasional",
+              "label": "Internasional",
+              "type": "NUMBER",
+              "unit": "orang",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "CALCULATED",
+              "unit": "orang",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "lokal,regional,nasional,internasional",
+              "options": "",
+              "min": 0,
               "max": null
             }
           ],
-          "items": [],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Hukum Keluarga Islam (Ahwal Syakhshiyyah)"
+            },
+            {
+              "code": "item_002",
+              "label": "Hukum Ekonomi Syariah"
+            },
+            {
+              "code": "item_003",
+              "label": "Hukum Tata Negara (Siyasah)"
+            },
+            {
+              "code": "item_004",
+              "label": "Ilmu Al-Qur'an dan Tafsir"
+            },
+            {
+              "code": "item_005",
+              "label": "Hukum Pidana Islam"
+            }
+          ],
           "code": "KL26-FASIH-01"
         },
         {
@@ -1399,38 +1543,98 @@
         {
           "name": "REALISASI DATA JUMLAH PRESTASI MAHASISWA PERPRODI TAHUN 2026",
           "source_rows": "1-145",
-          "form_type": "DYNAMIC",
-          "aggregation": "DISTINCT",
-          "result_field": "uraian",
+          "form_type": "FIXED",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
           "fields": [
             {
-              "code": "program_studi",
-              "label": "Program studi",
-              "type": "CHOICE",
-              "unit": "",
-              "required": true,
-              "decimals": 0,
-              "operation": "SUM",
-              "operands": "",
-              "options": "Bimbingan dan Konseling Islam\nKomunikasi dan Penyiaran Islam\nManajemen Dakwah\nPengembangan Masyarakat Islam\nDesain Komunikasi Visual",
-              "min": null,
-              "max": null
-            },
-            {
-              "code": "uraian",
-              "label": "Nama mahasiswa dan prestasi",
-              "type": "TEXT",
-              "unit": "",
+              "code": "lokal",
+              "label": "Lokal",
+              "type": "NUMBER",
+              "unit": "orang",
               "required": true,
               "decimals": 0,
               "operation": "SUM",
               "operands": "",
               "options": "",
-              "min": null,
+              "min": 0,
+              "max": null
+            },
+            {
+              "code": "regional",
+              "label": "Regional",
+              "type": "NUMBER",
+              "unit": "orang",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            },
+            {
+              "code": "nasional",
+              "label": "Nasional",
+              "type": "NUMBER",
+              "unit": "orang",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            },
+            {
+              "code": "internasional",
+              "label": "Internasional",
+              "type": "NUMBER",
+              "unit": "orang",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "CALCULATED",
+              "unit": "orang",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "lokal,regional,nasional,internasional",
+              "options": "",
+              "min": 0,
               "max": null
             }
           ],
-          "items": [],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Bimbingan dan Konseling Islam"
+            },
+            {
+              "code": "item_002",
+              "label": "Komunikasi dan Penyiaran Islam"
+            },
+            {
+              "code": "item_003",
+              "label": "Manajemen Dakwah"
+            },
+            {
+              "code": "item_004",
+              "label": "Pengembangan Masyarakat Islam"
+            },
+            {
+              "code": "item_005",
+              "label": "Desain Komunikasi Visual"
+            }
+          ],
           "code": "KL26-PDIK-01"
         },
         {
@@ -1559,38 +1763,102 @@
         {
           "name": "REALISASI DATA JUMLAH PRESTASI MAHASISWA PERPRODI TAHUN 2026",
           "source_rows": "1-210",
-          "form_type": "DYNAMIC",
-          "aggregation": "DISTINCT",
-          "result_field": "uraian",
+          "form_type": "FIXED",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
           "fields": [
             {
-              "code": "program_studi",
-              "label": "Program studi",
-              "type": "CHOICE",
-              "unit": "",
-              "required": true,
-              "decimals": 0,
-              "operation": "SUM",
-              "operands": "",
-              "options": "Ekonomi Syariah\nPerbankan Syariah\nManajemen Keuangan Syariah\nAkuntansi Syariah\nManajemen Bisnis Syariah\nBisnis Digital",
-              "min": null,
-              "max": null
-            },
-            {
-              "code": "uraian",
-              "label": "Nama mahasiswa dan prestasi",
-              "type": "TEXT",
-              "unit": "",
+              "code": "lokal",
+              "label": "Lokal",
+              "type": "NUMBER",
+              "unit": "orang",
               "required": true,
               "decimals": 0,
               "operation": "SUM",
               "operands": "",
               "options": "",
-              "min": null,
+              "min": 0,
+              "max": null
+            },
+            {
+              "code": "regional",
+              "label": "Regional",
+              "type": "NUMBER",
+              "unit": "orang",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            },
+            {
+              "code": "nasional",
+              "label": "Nasional",
+              "type": "NUMBER",
+              "unit": "orang",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            },
+            {
+              "code": "internasional",
+              "label": "Internasional",
+              "type": "NUMBER",
+              "unit": "orang",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "CALCULATED",
+              "unit": "orang",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "lokal,regional,nasional,internasional",
+              "options": "",
+              "min": 0,
               "max": null
             }
           ],
-          "items": [],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Ekonomi Syariah"
+            },
+            {
+              "code": "item_002",
+              "label": "Perbankan Syariah"
+            },
+            {
+              "code": "item_003",
+              "label": "Manajemen Keuangan Syariah"
+            },
+            {
+              "code": "item_004",
+              "label": "Akuntansi Syariah"
+            },
+            {
+              "code": "item_005",
+              "label": "Manajemen Bisnis Syariah"
+            },
+            {
+              "code": "item_006",
+              "label": "Bisnis Digital"
+            }
+          ],
           "code": "KL26-FEBI-01"
         },
         {
@@ -1719,38 +1987,106 @@
         {
           "name": "REALISASI DATA JUMLAH PRESTASI MAHASISWA PERPRODI TAHUN 2026",
           "source_rows": "1-181",
-          "form_type": "DYNAMIC",
-          "aggregation": "DISTINCT",
-          "result_field": "uraian",
+          "form_type": "FIXED",
+          "aggregation": "SUM",
+          "result_field": "jumlah",
           "fields": [
             {
-              "code": "program_studi",
-              "label": "Program studi",
-              "type": "CHOICE",
-              "unit": "",
-              "required": true,
-              "decimals": 0,
-              "operation": "SUM",
-              "operands": "",
-              "options": "Pendidikan Agama Islam\nHukum Keluarga Islam (Ahwal Syakhshiyyah)\nKomunikasi dan Penyiaran Islam\nEkonomi Syariah\nTadris Matematika\nPendidikan Dasar\nStudi Islam",
-              "min": null,
-              "max": null
-            },
-            {
-              "code": "uraian",
-              "label": "Nama mahasiswa dan prestasi",
-              "type": "TEXT",
-              "unit": "",
+              "code": "lokal",
+              "label": "Lokal",
+              "type": "NUMBER",
+              "unit": "orang",
               "required": true,
               "decimals": 0,
               "operation": "SUM",
               "operands": "",
               "options": "",
-              "min": null,
+              "min": 0,
+              "max": null
+            },
+            {
+              "code": "regional",
+              "label": "Regional",
+              "type": "NUMBER",
+              "unit": "orang",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            },
+            {
+              "code": "nasional",
+              "label": "Nasional",
+              "type": "NUMBER",
+              "unit": "orang",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            },
+            {
+              "code": "internasional",
+              "label": "Internasional",
+              "type": "NUMBER",
+              "unit": "orang",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "",
+              "options": "",
+              "min": 0,
+              "max": null
+            },
+            {
+              "code": "jumlah",
+              "label": "Jumlah",
+              "type": "CALCULATED",
+              "unit": "orang",
+              "required": true,
+              "decimals": 0,
+              "operation": "SUM",
+              "operands": "lokal,regional,nasional,internasional",
+              "options": "",
+              "min": 0,
               "max": null
             }
           ],
-          "items": [],
+          "items": [
+            {
+              "code": "item_001",
+              "label": "Pendidikan Agama Islam"
+            },
+            {
+              "code": "item_002",
+              "label": "Hukum Keluarga Islam (Ahwal Syakhshiyyah)"
+            },
+            {
+              "code": "item_003",
+              "label": "Komunikasi dan Penyiaran Islam"
+            },
+            {
+              "code": "item_004",
+              "label": "Ekonomi Syariah"
+            },
+            {
+              "code": "item_005",
+              "label": "Tadris Matematika"
+            },
+            {
+              "code": "item_006",
+              "label": "Pendidikan Dasar"
+            },
+            {
+              "code": "item_007",
+              "label": "Studi Islam"
+            }
+          ],
           "code": "KL26-PASCA-01"
         },
         {

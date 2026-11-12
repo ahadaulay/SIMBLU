@@ -166,7 +166,7 @@
         </div>
     </section>
 
-    <div class="modal fade" id="buildingModal" tabindex="-1" aria-labelledby="building-modal-title" aria-hidden="true" wire:ignore.self>
+    <div class="modal fade" id="buildingModal" tabindex="-1" aria-labelledby="building-modal-title" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" wire:ignore.self>
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content building-modal">
                 <div class="modal-header">

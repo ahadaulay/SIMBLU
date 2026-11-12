@@ -34,13 +34,41 @@ class Reporting2026SeederTest extends TestCase
         $this->assertDatabaseCount('indicator_assignments', 264);
         $this->assertDatabaseCount('unit_reports', 0);
         $this->assertDatabaseCount('report_entries', 0);
-        $this->assertSame(33, Indicator::where('form_type', 'FIXED')->count());
-        $this->assertSame(33, Indicator::where('form_type', 'DYNAMIC')->count());
+        $this->assertSame(38, Indicator::where('form_type', 'FIXED')->count());
+        $this->assertSame(28, Indicator::where('form_type', 'DYNAMIC')->count());
 
-        $facultyDetail = Indicator::where('code', 'KL26-FTIK-01')->firstOrFail();
-        $this->assertSame('DYNAMIC', $facultyDetail->form_type);
-        $this->assertSame('DISTINCT', $facultyDetail->aggregation);
-        $this->assertStringContainsString('Pendidikan Agama Islam', $facultyDetail->fields[0]['options']);
+        $facultyDetails = Indicator::where('name', 'REALISASI DATA JUMLAH PRESTASI MAHASISWA PERPRODI TAHUN 2026')->get();
+        $this->assertCount(5, $facultyDetails);
+        $facultyDetails->each(function (Indicator $indicator): void {
+            $this->assertSame('FIXED', $indicator->form_type);
+            $this->assertSame('SUM', $indicator->aggregation);
+            $this->assertSame('jumlah', $indicator->result_field);
+            $this->assertSame(
+                ['lokal', 'regional', 'nasional', 'internasional', 'jumlah'],
+                array_column($indicator->fields, 'code'),
+            );
+            $this->assertSame(
+                ['NUMBER', 'NUMBER', 'NUMBER', 'NUMBER', 'CALCULATED'],
+                array_column($indicator->fields, 'type'),
+            );
+            $this->assertSame('lokal,regional,nasional,internasional', $indicator->fields[4]['operands']);
+            $this->assertNotEmpty($indicator->items);
+        });
+
+        $facultyDetail = $facultyDetails->firstWhere('code', 'KL26-FTIK-01');
+        $this->assertSame([
+            'Pendidikan Agama Islam',
+            'Pendidikan Bahasa Arab',
+            'Tadris Bahasa Inggris',
+            'Pendidikan Matematika',
+            'Pend. Guru Madrasah Ibtidaiyah (PGMI)',
+            'Pendidikan Islam Anak Usia Dini',
+            'Tadris Kimia',
+            'Tadris Biologi',
+            'Tadris Fisika',
+            'Tadris Bahasa Indonesia',
+            'Teknologi Informasi',
+        ], array_column($facultyDetail->items, 'label'));
 
         $facultyRecap = Indicator::where('code', 'KL26-FTIK-02')->firstOrFail();
         $this->assertSame('FIXED', $facultyRecap->form_type);
@@ -60,6 +88,18 @@ class Reporting2026SeederTest extends TestCase
         ], array_column($studentCount->items, 'label'));
 
         $calculator = app(IndicatorCalculator::class);
+        $this->assertNull($calculator->fieldValue($facultyDetail->fields[4], [
+            'lokal' => '',
+            'regional' => 2,
+            'nasional' => 3,
+            'internasional' => 4,
+        ]));
+        $this->assertSame(10.0, $calculator->fieldValue($facultyDetail->fields[4], [
+            'lokal' => 1,
+            'regional' => 2,
+            'nasional' => 3,
+            'internasional' => 4,
+        ]));
         Indicator::query()->each(fn (Indicator $indicator) => $calculator->validateDefinition(
             $indicator->fields,
             $indicator->items,

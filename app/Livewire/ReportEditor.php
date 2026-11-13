@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -130,6 +131,10 @@ class ReportEditor extends Component
             'detailDraft.*.name.required' => 'Nama detail wajib diisi.',
             'detailDraft.*.amount.required' => 'Jumlah detail wajib diisi.',
             'detailDraft.*.amount.numeric' => 'Jumlah detail harus berupa angka.',
+        ], [
+            'detailDraft' => 'daftar detail',
+            'detailDraft.*.name' => 'nama detail',
+            'detailDraft.*.amount' => 'jumlah detail',
         ]);
 
         $entry = $report->entries()->findOrFail($this->detailEntryId);
@@ -164,16 +169,43 @@ class ReportEditor extends Component
 
     public function save(ReportWorkflow $workflow): void
     {
-        $workflow->save($this->reportId, $this->version, $this->sections, false);
+        try {
+            $workflow->save($this->reportId, $this->version, $this->sections, false);
+        } catch (ValidationException $exception) {
+            $this->showValidationErrors($exception);
+
+            return;
+        }
+
         $this->reload();
         session()->flash('success', 'Draf tersimpan. Nilai perhitungan sudah diperbarui.');
     }
 
     public function submit(ReportWorkflow $workflow): void
     {
-        $workflow->save($this->reportId, $this->version, $this->sections, true);
+        try {
+            $workflow->save($this->reportId, $this->version, $this->sections, true);
+        } catch (ValidationException $exception) {
+            $this->showValidationErrors($exception);
+
+            return;
+        }
+
         $this->reload();
         session()->flash('success', 'Laporan diajukan untuk verifikasi.');
+    }
+
+    private function showValidationErrors(ValidationException $exception): void
+    {
+        $this->resetValidation();
+
+        foreach ($exception->errors() as $key => $messages) {
+            foreach ($messages as $message) {
+                $this->addError($key, $message);
+            }
+        }
+
+        $this->dispatch('report-validation-failed');
     }
 
     public function transition(string $action, ReportWorkflow $workflow): void
@@ -225,7 +257,11 @@ class ReportEditor extends Component
 
     public function upload(int $entryId, ReportWorkflow $workflow): void
     {
-        $this->validate(['uploads.'.$entryId => ['required', 'file', 'mimes:'.implode(',', config('reporting.attachment_types')), 'max:'.config('reporting.attachment_max_kb')]]);
+        $this->validate(
+            ['uploads.'.$entryId => ['required', 'file', 'mimes:'.implode(',', config('reporting.attachment_types')), 'max:'.config('reporting.attachment_max_kb')]],
+            [],
+            ['uploads.'.$entryId => 'lampiran bukti'],
+        );
         $file = $this->uploads[$entryId];
         $path = null;
         try {

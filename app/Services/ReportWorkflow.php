@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\IndicatorAssignment;
+use App\Models\ReportEntry;
 use App\Models\ReportingPeriod;
 use App\Models\UnitReport;
 use App\Models\User;
@@ -136,11 +137,19 @@ class ReportWorkflow
         $hasEditableStatus = in_array($report->status, ['DRAFT', 'REVISION'], true);
         $isPeriodOpen = $report->period->status === 'OPEN';
 
-        abort_unless(
-            $isUnitUser && $hasEditableStatus && $isPeriodOpen,
-            403,
-            'Laporan tidak dapat diubah.'
-        );
+        abort_unless($isUnitUser, 403);
+
+        if (! $hasEditableStatus) {
+            throw ValidationException::withMessages([
+                'report' => 'Laporan tidak dapat diubah karena statusnya sudah '.strtolower(config('reporting.statuses')[$report->status] ?? $report->status).'.',
+            ]);
+        }
+
+        if (! $isPeriodOpen) {
+            throw ValidationException::withMessages([
+                'report' => 'Laporan tidak dapat diubah karena periode pengisian belum dibuka atau sudah ditutup.',
+            ]);
+        }
     }
 
     public function locked(int $id, int $version): UnitReport
@@ -192,20 +201,25 @@ class ReportWorkflow
         foreach ($report->entries as $entry) {
             $section = $sections[$entry->id];
             $prefix = 'sections.'.$entry->id.'.';
-            Validator::make(['sections' => [$entry->id => $section]], [
-                $prefix.'rows' => ['present', 'array'],
-                $prefix.'no_activity' => ['required', 'boolean'],
-                $prefix.'explanation' => ['nullable', 'string', 'max:10000'],
-                $prefix.'responsible_name' => ['nullable', 'string', 'max:150'],
-            ])->validate();
-            $hasValues = collect($section['rows'])->contains(
-                fn ($row) => collect($row['values'] ?? [])->contains(
-                    fn ($value) => $value !== null && $value !== ''
-                )
-            );
-            $needed = $complete && ($entry->required || $hasValues || $section['no_activity']);
 
             try {
+                Validator::make($section, [
+                    'rows' => ['present', 'array'],
+                    'no_activity' => ['required', 'boolean'],
+                    'explanation' => ['nullable', 'string', 'max:10000'],
+                    'responsible_name' => ['nullable', 'string', 'max:150'],
+                ], [], [
+                    'rows' => 'daftar butir',
+                    'no_activity' => 'pilihan tidak ada kegiatan',
+                    'explanation' => 'penjelasan',
+                    'responsible_name' => 'nama penanggung jawab',
+                ])->validate();
+                $hasValues = collect($section['rows'])->contains(
+                    fn ($row) => collect($row['values'] ?? [])->contains(
+                        fn ($value) => $value !== null && $value !== ''
+                    )
+                );
+                $needed = $complete && ($entry->required || $hasValues || $section['no_activity']);
                 $rows = $this->calculator->normalize(
                     $entry->definition,
                     $section['rows'],
@@ -213,17 +227,17 @@ class ReportWorkflow
                     (bool) $section['no_activity'],
                 );
             } catch (ValidationException $e) {
-                $messages = [];
-                foreach ($e->errors() as $key => $errors) {
-                    $messages[$prefix.$key] = $errors;
-                }
-                throw ValidationException::withMessages($messages);
+                throw $this->contextualValidation($entry, $section, $prefix, $e);
             }
             if ($needed && ($entry->definition['requires_explanation'] || $section['no_activity']) && blank($section['explanation'])) {
-                throw ValidationException::withMessages([$prefix.'explanation' => 'Isi penjelasan, termasuk alasan tidak ada kegiatan.']);
+                throw ValidationException::withMessages([
+                    $prefix.'explanation' => $this->entryContext($entry, $section).' Isi penjelasan, termasuk alasan tidak ada kegiatan.',
+                ]);
             }
             if ($needed && $entry->definition['requires_attachment'] && ! $report->attachments->contains('entry_id', $entry->id)) {
-                throw ValidationException::withMessages([$prefix.'attachment' => 'Unggah bukti untuk indikator ini.']);
+                throw ValidationException::withMessages([
+                    $prefix.'attachment' => $this->entryContext($entry, $section).' Unggah bukti pendukung untuk indikator ini.',
+                ]);
             }
             $entry->update([
                 'rows' => $rows,
@@ -233,6 +247,37 @@ class ReportWorkflow
                 'responsible_name' => $entry->responsible_name,
             ]);
         }
+    }
+
+    private function contextualValidation(ReportEntry $entry, array $section, string $prefix, ValidationException $exception): ValidationException
+    {
+        $messages = [];
+
+        foreach ($exception->errors() as $key => $errors) {
+            preg_match('/^rows\.(\d+)/', $key, $matches);
+            $rowIndex = isset($matches[1]) ? (int) $matches[1] : null;
+            $context = $this->entryContext($entry, $section, $rowIndex);
+            $messages[$prefix.$key] = array_map(
+                fn (string $message): string => $context.' '.$message,
+                $errors,
+            );
+        }
+
+        return ValidationException::withMessages($messages);
+    }
+
+    private function entryContext(ReportEntry $entry, array $section, ?int $rowIndex = null): string
+    {
+        $context = 'Indikator “'.$entry->definition['name'].'”';
+
+        if ($rowIndex !== null) {
+            $label = trim((string) ($section['rows'][$rowIndex]['label'] ?? ''));
+            $context .= ', butir “'.($label !== '' ? $label : 'baris ke-'.($rowIndex + 1)).'”:';
+        } else {
+            $context .= ':';
+        }
+
+        return $context;
     }
 
     public function transition(int $id, int $version, string $action, string $note): UnitReport

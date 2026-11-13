@@ -56,6 +56,15 @@ class AuthenticationTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_validation_messages_are_shown_in_indonesian(): void
+    {
+        $this->post(route('login.store'), [])
+            ->assertSessionHasErrors([
+                'email' => 'email wajib diisi.',
+                'password' => 'kata sandi wajib diisi.',
+            ]);
+    }
+
     public function test_login_is_throttled_after_five_failed_attempts(): void
     {
         $user = User::factory()->create();

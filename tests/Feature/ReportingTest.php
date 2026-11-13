@@ -167,9 +167,24 @@ class ReportingTest extends TestCase
     {
         $report = $this->start();
         $entry = $report->entries()->first();
-        Livewire::test(ReportEditor::class, ['reportId' => $report->id])->call('save')->assertHasNoErrors()->call('submit')->assertHasErrors('sections.'.$entry->id.'.rows.0.values.amount')->set('sections.'.$entry->id.'.rows.0.values.amount', 0)->call('submit')->assertHasNoErrors();
+        Livewire::test(ReportEditor::class, ['reportId' => $report->id])
+            ->call('save')
+            ->assertHasNoErrors()
+            ->call('submit')
+            ->assertHasErrors('sections.'.$entry->id.'.rows.0.values.amount')
+            ->assertDispatched('report-validation-failed')
+            ->assertSee('Laporan belum dapat diproses.')
+            ->assertSee('Indikator “Mahasiswa baru”, butir “Mahasiswa baru”')
+            ->assertSee('kolom amount wajib diisi')
+            ->set('sections.'.$entry->id.'.rows.0.values.amount', 0)
+            ->call('submit')
+            ->assertHasNoErrors();
         $this->assertSame('SUBMITTED', $report->fresh()->status);
-        Livewire::test(ReportEditor::class, ['reportId' => $report->id])->call('save')->assertForbidden();
+        Livewire::test(ReportEditor::class, ['reportId' => $report->id])
+            ->call('save')
+            ->assertHasErrors('report')
+            ->assertDispatched('report-validation-failed')
+            ->assertSee('statusnya sudah diajukan');
     }
 
     public function test_optional_row_details_must_match_the_main_total_on_submit(): void
@@ -267,7 +282,11 @@ class ReportingTest extends TestCase
         $first->call('save')->assertHasNoErrors();
         $second->call('save')->assertHasErrors('report');
         $this->period->update(['status' => 'CLOSED']);
-        Livewire::test(ReportEditor::class, ['reportId' => $report->id])->call('save')->assertForbidden();
+        Livewire::test(ReportEditor::class, ['reportId' => $report->id])
+            ->call('save')
+            ->assertHasErrors('report')
+            ->assertDispatched('report-validation-failed')
+            ->assertSee('periode pengisian belum dibuka atau sudah ditutup');
     }
 
     public function test_assignment_cannot_change_after_report_is_created(): void

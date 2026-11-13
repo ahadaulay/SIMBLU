@@ -52,9 +52,10 @@
         <div class="alert alert-success" role="status">{{ session('success') }}</div>
     @endif
     @if($errors->any())
-        <div class="alert alert-danger" role="alert">
-            <strong>Periksa isian berikut:</strong>
-            <ul>
+        <div id="report-validation-summary" class="alert alert-danger" role="alert" tabindex="-1">
+            <strong>Laporan belum dapat diproses.</strong>
+            <p class="mb-2">Perbaiki bagian berikut, kemudian simpan atau ajukan kembali:</p>
+            <ul class="mb-0">
                 @foreach($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -97,8 +98,10 @@
                                     <tr wire:key="row-{{ $entry->id }}-{{ $row['key'] }}">
                                         <td style="min-width:180px">
                                             @if($definition['form_type'] === 'DYNAMIC')
+                                                @php($labelPath = 'sections.'.$entry->id.'.rows.'.$index.'.label')
                                                 <label class="visually-hidden" for="row-{{ $entry->id }}-{{ $index }}">Uraian baris</label>
-                                                <input id="row-{{ $entry->id }}-{{ $index }}" class="form-control" wire:model="sections.{{ $entry->id }}.rows.{{ $index }}.label">
+                                                <input id="row-{{ $entry->id }}-{{ $index }}" class="form-control @error($labelPath) is-invalid @enderror" wire:model="{{ $labelPath }}">
+                                                @error($labelPath)<div class="invalid-feedback">{{ $message }}</div>@enderror
                                             @else
                                                 {{ $row['label'] }}
                                             @endif
@@ -112,20 +115,20 @@
                                                     <output id="{{ $inputId }}">{{ app(\App\Services\IndicatorCalculator::class)->fieldValue($field, $row['values']) ?? '—' }}</output>
                                                     <small class="text-muted d-block">Dihitung saat simpan</small>
                                                 @elseif($field['type'] === 'CHOICE')
-                                                    <select id="{{ $inputId }}" class="form-select" wire:model="{{ $path }}">
+                                                    <select id="{{ $inputId }}" class="form-select @error($path) is-invalid @enderror" wire:model="{{ $path }}">
                                                         <option value="">Pilih</option>
                                                         @foreach(app(\App\Services\IndicatorCalculator::class)->options($field) as $option)
                                                             <option value="{{ $option }}">{{ $option }}</option>
                                                         @endforeach
                                                     </select>
                                                 @elseif($field['type'] === 'BOOLEAN')
-                                                    <select id="{{ $inputId }}" class="form-select" wire:model="{{ $path }}">
+                                                    <select id="{{ $inputId }}" class="form-select @error($path) is-invalid @enderror" wire:model="{{ $path }}">
                                                         <option value="">Pilih</option>
                                                         <option value="1">Ya</option>
                                                         <option value="0">Tidak</option>
                                                     </select>
                                                 @else
-                                                    <input id="{{ $inputId }}" class="form-control" type="{{ $field['type'] === 'NUMBER' ? 'number' : ($field['type'] === 'DATE' ? 'date' : 'text') }}" step="any" wire:model="{{ $path }}">
+                                                    <input id="{{ $inputId }}" class="form-control @error($path) is-invalid @enderror" type="{{ $field['type'] === 'NUMBER' ? 'number' : ($field['type'] === 'DATE' ? 'date' : 'text') }}" step="any" wire:model="{{ $path }}">
                                                 @endif
                                                 @error($path)
                                                     <div class="text-danger">{{ $message }}</div>
@@ -158,8 +161,9 @@
                     <div class="row g-3">
                         <div class="col-md-8">
                             <label for="explanation-{{ $entry->id }}">Penjelasan / alasan kondisi</label>
-                            <textarea id="explanation-{{ $entry->id }}" class="form-control" wire:model="sections.{{ $entry->id }}.explanation">
+                            <textarea id="explanation-{{ $entry->id }}" class="form-control @error('sections.'.$entry->id.'.explanation') is-invalid @enderror" wire:model="sections.{{ $entry->id }}.explanation">
                             </textarea>
+                            @error('sections.'.$entry->id.'.explanation')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-md-4">
                             <label for="responsible-{{ $entry->id }}">Nama ASN penanggung jawab</label>
@@ -185,6 +189,9 @@
                         <input id="upload-{{ $entry->id }}" type="file" class="form-control mb-2" wire:model="uploads.{{ $entry->id }}">
                         <div wire:loading wire:target="uploads.{{ $entry->id }},upload" class="text-muted" role="status">Mengunggah...</div>
                         @error('uploads.'.$entry->id)
+                            <div class="text-danger">{{ $message }}</div>
+                        @enderror
+                        @error('sections.'.$entry->id.'.attachment')
                             <div class="text-danger">{{ $message }}</div>
                         @enderror
                     @endif
@@ -367,6 +374,11 @@
 
                 $wire.on('close-report-detail-modal', () => {
                     bootstrap.Modal.getOrCreateInstance(document.getElementById('reportDetailModal')).hide();
+                });
+
+                $wire.on('report-validation-failed', () => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    setTimeout(() => document.getElementById('report-validation-summary')?.focus({ preventScroll: true }), 300);
                 });
             </script>
         @endscript

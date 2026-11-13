@@ -127,6 +127,14 @@ class IndicatorCalculator
             'rows.*.details' => ['sometimes', 'array', 'max:500'],
             'rows.*.details.*.name' => [$complete ? 'required' : 'nullable', 'string', 'max:255'],
             'rows.*.details.*.amount' => [$complete ? 'required' : 'nullable', 'numeric', 'between:0,999999999999'],
+        ], [], [
+            'rows' => 'daftar butir',
+            'rows.*.key' => 'kode baris',
+            'rows.*.label' => 'uraian',
+            'rows.*.values' => 'nilai',
+            'rows.*.details' => 'daftar detail',
+            'rows.*.details.*.name' => 'nama detail',
+            'rows.*.details.*.amount' => 'jumlah detail',
         ])->validate();
         $normalized = [];
         foreach ($rows as $index => $row) {
@@ -140,7 +148,9 @@ class IndicatorCalculator
                 if ($field['type'] === 'CALCULATED') {
                     $value = $this->fieldValue($field, $values);
                     if ($value === null && $complete) {
-                        throw ValidationException::withMessages(['rows.'.$index.'.values.'.$code => 'Hasil tidak dapat dihitung. Periksa seluruh nilai sumber.']);
+                        throw ValidationException::withMessages([
+                            'rows.'.$index.'.values.'.$code => 'Kolom '.$field['label'].' tidak dapat dihitung. Periksa seluruh nilai sumbernya.',
+                        ]);
                     }
                 }
                 $rules = [$complete && $field['required'] ? 'required' : 'nullable'];
@@ -158,7 +168,12 @@ class IndicatorCalculator
                         }
                     }
                 }
-                Validator::make(['rows' => [$index => ['values' => [$code => $value]]]], ['rows.'.$index.'.values.'.$code => $rules])->validate();
+                Validator::make(
+                    ['rows' => [$index => ['values' => [$code => $value]]]],
+                    ['rows.'.$index.'.values.'.$code => $rules],
+                    [],
+                    ['rows.'.$index.'.values.'.$code => 'kolom '.$field['label']],
+                )->validate();
                 $values[$code] = $value !== null && in_array($field['type'], ['NUMBER', 'CALCULATED']) ? round((float) $value, (int) $field['decimals']) : $value;
             }
             $details = array_map(fn (array $detail) => [

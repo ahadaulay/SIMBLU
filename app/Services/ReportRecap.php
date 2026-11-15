@@ -28,7 +28,7 @@ class ReportRecap
         $metrics = empty($filters['metrics']) ? collect() : RecapMetric::whereIn('id', $filters['metrics'])->get();
         $unitIds = auth()->user()->role === 'UNIT' ? [auth()->user()->unit_id] : $filters['units'];
         $periods = ReportingPeriod::with('cycle')->whereIn('id', $filters['periods'])->orderBy('year')->orderBy('quarter')->get();
-        $reports = UnitReport::with(['period', 'unit', 'entries'])->whereIn('period_id', $filters['periods'])->where('status', 'VERIFIED')->when($unitIds, fn ($q) => $q->whereIn('unit_id', $unitIds))->get();
+        $reports = UnitReport::with(['period', 'unit', 'entries.sourceEntry'])->whereIn('period_id', $filters['periods'])->where('status', 'VERIFIED')->when($unitIds, fn ($q) => $q->whereIn('unit_id', $unitIds))->get();
         $previousPeriods = ReportingPeriod::where(function ($query) use ($periods): void {
             foreach ($periods as $period) {
                 $query->orWhere(fn ($q) => $q
@@ -43,14 +43,20 @@ class ReportRecap
                     ));
             }
         })->with('cycle')->get();
-        $previousReports = UnitReport::with(['period.cycle', 'entries'])->whereIn('period_id', $previousPeriods->pluck('id'))->where('status', 'VERIFIED')->when($unitIds, fn ($q) => $q->whereIn('unit_id', $unitIds))->get()->keyBy(fn ($report) => $report->unit_id.':'.sprintf('%04d-%d', $report->period->year, $report->period->quarter));
+        $previousReports = UnitReport::with(['period.cycle', 'entries.sourceEntry'])->whereIn('period_id', $previousPeriods->pluck('id'))->where('status', 'VERIFIED')->when($unitIds, fn ($q) => $q->whereIn('unit_id', $unitIds))->get()->keyBy(fn ($report) => $report->unit_id.':'.sprintf('%04d-%d', $report->period->year, $report->period->quarter));
         $buckets = [];
         $incompatible = [];
         foreach ($reports as $report) {
             $entries = [];
             foreach ($report->entries as $original) {
+                $sourceRows = $original->effectiveRows();
+                $sourceNoActivity = $original->effectiveNoActivity();
+                $entry = clone $original;
+
                 if ($metrics->isEmpty()) {
-                    $entries[] = [$original, null];
+                    $entry->rows = $sourceRows;
+                    $entry->no_activity = $sourceNoActivity;
+                    $entries[] = [$entry, null];
 
                     continue;
                 }
@@ -62,8 +68,8 @@ class ReportRecap
                     }
                     $entry = clone $original;
                     $entry->definition = $metric->definition($original->definition);
-                    $entry->rows = $metric->rows($original->rows);
-                    $entry->no_activity = $original->no_activity || ($original->rows !== [] && $entry->rows === []);
+                    $entry->rows = $metric->rows($sourceRows);
+                    $entry->no_activity = $sourceNoActivity || ($sourceRows !== [] && $entry->rows === []);
                     $entries[] = [$entry, $metric];
                 }
             }
@@ -86,9 +92,11 @@ class ReportRecap
                 $previousKey = sprintf('%04d-%d', $report->period->year - 1, $report->period->quarter);
                 $previousEntry = $previousReports->get($report->unit_id.':'.$previousKey)?->entries->firstWhere('indicator_id', $entry->indicator_id);
                 if ($previousEntry && $previousEntry->definition['version'] === $definition['version']) {
-                    $previousRows = $metric ? $metric->rows($previousEntry->rows) : $previousEntry->rows;
+                    $previousSourceRows = $previousEntry->effectiveRows();
+                    $previousNoActivity = $previousEntry->effectiveNoActivity();
+                    $previousRows = $metric ? $metric->rows($previousSourceRows) : $previousSourceRows;
                     $bucket['previousRows'][$previousKey] = array_merge($bucket['previousRows'][$previousKey] ?? [], $previousRows);
-                    $bucket['previousEmpty'] = $bucket['previousEmpty'] && ($previousEntry->no_activity || ($metric && $previousEntry->rows !== [] && $previousRows === []));
+                    $bucket['previousEmpty'] = $bucket['previousEmpty'] && ($previousNoActivity || ($metric && $previousSourceRows !== [] && $previousRows === []));
                 } else {
                     $bucket['previousComplete'] = false;
                 }

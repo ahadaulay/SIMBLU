@@ -179,7 +179,7 @@ class Reporting2025DummySeeder extends Seeder
         $detailField = $calculator->detailField($definition);
 
         if (! $detailField) {
-            throw new RuntimeException('Field hasil indikator harus berupa angka.');
+            return $calculator->normalize($definition, $rows, true);
         }
 
         foreach ($rows as &$row) {

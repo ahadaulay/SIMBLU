@@ -2510,20 +2510,20 @@
           "name": "REALISASI DATA AKRDITASI PRODI TAHUN 2026",
           "source_rows": "1-49",
           "form_type": "FIXED",
-          "aggregation": "LAST",
+          "aggregation": "DETAIL",
           "result_field": "jumlah",
           "fields": [
             {
               "code": "jumlah",
               "label": "Jumlah",
-              "type": "NUMBER",
+              "type": "TEXT",
               "unit": "",
-              "required": true,
+              "required": false,
               "decimals": 2,
               "operation": "SUM",
               "operands": "",
               "options": "",
-              "min": 0,
+              "min": null,
               "max": null
             }
           ],

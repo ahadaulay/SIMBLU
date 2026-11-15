@@ -17,6 +17,7 @@ use App\Models\Indicator;
 use App\Models\IndicatorAssignment;
 use App\Models\IndicatorCategory;
 use App\Models\RecapMetric;
+use App\Models\ReportingCycle;
 use App\Models\ReportingExport;
 use App\Models\ReportingPeriod;
 use App\Models\Unit;
@@ -187,6 +188,78 @@ class ReportingTest extends TestCase
             ->assertSee('statusnya sudah diajukan');
     }
 
+    public function test_previous_quarter_reference_stays_linked_to_source_data(): void
+    {
+        $cycle = ReportingCycle::create([
+            'year' => 2026,
+            'frequency' => 'QUARTERLY',
+            'created_by' => $this->admin->id,
+        ]);
+        $this->period->update(['cycle_id' => $cycle->id]);
+        $secondPeriod = ReportingPeriod::create([
+            'cycle_id' => $cycle->id,
+            'year' => 2026,
+            'quarter' => 2,
+            'deadline' => '2026-07-10',
+            'status' => 'OPEN',
+        ]);
+        $this->assign($secondPeriod);
+
+        $firstReport = $this->start();
+        $firstEntry = $firstReport->entries()->firstOrFail();
+        $secondReport = app(ReportWorkflow::class)->start($secondPeriod->id, $this->operator);
+        $secondEntry = $secondReport->entries()->firstOrFail();
+
+        // The checkbox stays hidden while the previous quarter has no data.
+        Livewire::test(ReportEditor::class, ['reportId' => $secondReport->id])
+            ->assertDontSee('Sama seperti triwulan sebelumnya')
+            ->set('sections.'.$secondEntry->id.'.use_previous', true)
+            ->call('save')
+            ->assertHasErrors('sections.'.$secondEntry->id.'.use_previous');
+
+        Livewire::test(ReportEditor::class, ['reportId' => $firstReport->id])
+            ->set('sections.'.$firstEntry->id.'.rows.0.values.amount', 10)
+            ->call('save')
+            ->assertHasNoErrors();
+
+        Livewire::test(ReportEditor::class, ['reportId' => $secondReport->id])
+            ->assertSee('Sama seperti triwulan sebelumnya (TW 1 / 2026)')
+            ->call('togglePrevious', $secondEntry->id, true)
+            ->assertSet('sections.'.$secondEntry->id.'.rows.0.values.amount', 10)
+            ->set('sections.'.$secondEntry->id.'.rows.0.values.amount', 999)
+            ->call('submit')
+            ->assertHasNoErrors();
+
+        $secondEntry->refresh();
+        $this->assertSame($firstEntry->id, $secondEntry->source_entry_id);
+        $this->assertEquals(10, $secondEntry->rows[0]['values']['amount']);
+        $this->assertEquals(10, $secondEntry->effectiveRows()[0]['values']['amount']);
+
+        $this->actingAs($this->admin);
+        Livewire::test(ReportEditor::class, ['reportId' => $secondReport->id])
+            ->call('transition', 'VERIFIED')
+            ->assertHasNoErrors();
+
+        $this->actingAs($this->operator);
+        Livewire::test(ReportEditor::class, ['reportId' => $firstReport->id])
+            ->set('sections.'.$firstEntry->id.'.rows.0.values.amount', 25)
+            ->call('save')
+            ->assertHasNoErrors();
+
+        Livewire::test(ReportEditor::class, ['reportId' => $secondReport->id])
+            ->assertSet('sections.'.$secondEntry->id.'.rows.0.values.amount', 25);
+
+        $this->actingAs($this->admin);
+        $result = app(ReportRecap::class)->build([
+            'periods' => [$secondPeriod->id],
+            'units' => [],
+            'indicators' => [],
+            'grouping' => 'TOTAL',
+        ]);
+
+        $this->assertEquals(25, $result['rows'][0]['value']);
+    }
+
     public function test_optional_row_details_must_match_the_main_total_on_submit(): void
     {
         $this->indicator->update([
@@ -241,6 +314,30 @@ class ReportingTest extends TestCase
         $details = $entry->fresh()->rows[0]['details'];
         $this->assertSame('Prestasi A', $details[0]['name']);
         $this->assertEquals(3, $details[0]['amount']);
+    }
+
+    public function test_admin_and_unit_can_open_details_when_period_is_closed(): void
+    {
+        $report = $this->start();
+        $entry = $report->entries()->firstOrFail();
+        $rows = $entry->rows;
+        $rows[0]['values']['amount'] = 3;
+        $rows[0]['details'] = [['name' => 'Prestasi A', 'amount' => 3]];
+        $entry->update(['rows' => $rows]);
+        $report->update(['status' => 'VERIFIED', 'verified_by' => $this->admin->id, 'verified_at' => now()]);
+        $this->period->update(['status' => 'CLOSED']);
+
+        foreach ([$this->operator, $this->admin] as $user) {
+            $this->actingAs($user);
+            Livewire::test(ReportEditor::class, ['reportId' => $report->id])
+                ->call('openDetails', $entry->id, 0)
+                ->assertDispatched('open-report-detail-modal')
+                ->assertSet('detailDraft.0.name', 'Prestasi A')
+                ->assertViewHas(
+                    'selectedDetail',
+                    fn (array $detail): bool => $detail['details'][0]['name'] === 'Prestasi A',
+                );
+        }
     }
 
     public function test_revision_verification_reopening_and_snapshots(): void
@@ -333,7 +430,16 @@ class ReportingTest extends TestCase
         $result = app(ReportRecap::class)->build($filters);
         $this->assertEquals(35, $result['rows'][0]['value']);
         $this->assertCount(1, $result['missing']);
-        Livewire::test(RecapTable::class)->set('periodIds', [$this->period->id, $second->id])->set('grouping', 'TOTAL')->assertSee('35,0000');
+        Livewire::test(RecapTable::class)
+            ->set('periodIds', [$this->period->id, $second->id])
+            ->set('grouping', 'TOTAL')
+            ->call('showStatistics')
+            ->assertRedirect();
+        $this->get(route('recaps.statistics').'?'.http_build_query($filters))
+            ->assertOk()
+            ->assertSee('Statistik Laporan Custom')
+            ->assertSee('35')
+            ->assertDontSee('35,0000');
         $this->get(route('recaps.print').'?'.http_build_query($filters))->assertOk()->assertSee('35,0000');
         $path = app(SpreadsheetExport::class)->create($result);
         $zip = new \ZipArchive;

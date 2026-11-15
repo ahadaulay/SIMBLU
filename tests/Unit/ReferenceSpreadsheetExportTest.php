@@ -40,6 +40,14 @@ class ReferenceSpreadsheetExportTest extends TestCase
             $this->assertStringContainsString('Layanan Akademik', $workbook);
             $this->assertStringContainsString('Nama ASN Penanggung Jawab', $recap);
             $this->assertStringContainsString('Jumlah Total Mahasiswa Aktif S1', $recap);
+            $this->assertStringNotContainsString('<pane ', $recap);
+            $this->assertStringContainsString('customHeight="1"', $recap);
+            foreach (range(1, 4) as $quarter) {
+                $this->assertStringContainsString(
+                    'PERBANDINGAN TW '.$quarter.' DENGAN TW '.$quarter.' TAHUN SEBELUMNYA',
+                    $recap,
+                );
+            }
         } finally {
             $zip->close();
 
@@ -63,13 +71,19 @@ class ReferenceSpreadsheetExportTest extends TestCase
                 'previous_value' => null,
                 'value' => 200,
                 'condition' => 'Tidak dapat dibandingkan',
-                'definition' => ['form_type' => 'DYNAMIC', 'result_field' => 'jumlah'],
+                'definition' => [
+                    'form_type' => 'DYNAMIC',
+                    'result_field' => 'jumlah',
+                    'fields' => [['code' => 'jumlah', 'label' => 'Jumlah']],
+                ],
                 'sources' => [[
                     'explanation' => '',
                     'responsible_name' => 'Operator Layanan Akademik',
                     'period' => 'TW 1 / 2026',
                     'rows' => [
-                        ['key' => 'r1', 'label' => 'Kamboja', 'values' => ['jumlah' => 100]],
+                        ['key' => 'r1', 'label' => 'Kamboja', 'values' => ['jumlah' => 100], 'details' => [
+                            ['name' => 'Sok Dara', 'amount' => 100],
+                        ]],
                         ['key' => 'r2', 'label' => 'Thailand', 'values' => ['jumlah' => 100]],
                     ],
                 ]],
@@ -85,6 +99,7 @@ class ReferenceSpreadsheetExportTest extends TestCase
             $this->assertStringContainsString('Mahasiswa Luar Negeri', $unitSheet);
             $this->assertStringContainsString('Kamboja', $unitSheet);
             $this->assertStringContainsString('Thailand', $unitSheet);
+            $this->assertStringContainsString('Sok Dara', $unitSheet);
         } finally {
             $zip->close();
 
@@ -108,13 +123,19 @@ class ReferenceSpreadsheetExportTest extends TestCase
                 'previous_value' => null,
                 'value' => 15,
                 'condition' => 'Tidak dapat dibandingkan',
-                'definition' => ['form_type' => 'FIXED', 'result_field' => 'jumlah'],
+                'definition' => [
+                    'form_type' => 'FIXED',
+                    'result_field' => 'jumlah',
+                    'fields' => [['code' => 'jumlah', 'label' => 'Jumlah']],
+                ],
                 'sources' => [[
                     'explanation' => '',
                     'responsible_name' => 'Operator Layanan Akademik',
                     'period' => 'TW 1 / 2026',
                     'rows' => [
-                        ['key' => 'ruang', 'label' => 'Ruang Kelas', 'values' => ['jumlah' => 10]],
+                        ['key' => 'ruang', 'label' => 'Ruang Kelas', 'values' => ['jumlah' => 10], 'details' => [
+                            ['name' => 'Gedung A', 'amount' => 10],
+                        ]],
                         ['key' => 'lab', 'label' => 'Laboratorium', 'values' => ['jumlah' => 5]],
                     ],
                 ]],
@@ -130,6 +151,7 @@ class ReferenceSpreadsheetExportTest extends TestCase
             $this->assertStringContainsString('Sarana Prasarana', $unitSheet);
             $this->assertStringContainsString('Ruang Kelas', $unitSheet);
             $this->assertStringContainsString('Laboratorium', $unitSheet);
+            $this->assertStringContainsString('Gedung A', $unitSheet);
         } finally {
             $zip->close();
 

@@ -44,6 +44,6 @@ class ReportingDashboard extends Component
         $reported = (clone $query)->pluck('unit_id');
         $missing = Unit::whereIn('id', $assigned->diff($reported))->orderBy('name')->get(['id', 'name']);
 
-        return view('livewire.reporting-dashboard', ['period' => $period, 'periods' => ReportingPeriod::orderByDesc('year')->orderByDesc('quarter')->get(), 'counts' => $counts, 'missing' => $missing, 'records' => (clone $query)->with(['unit', 'entries', 'attachments'])->latest()->paginate(10)]);
+        return view('livewire.reporting-dashboard', ['period' => $period, 'periods' => ReportingPeriod::orderByDesc('year')->orderByDesc('quarter')->get(), 'counts' => $counts, 'missing' => $missing, 'records' => (clone $query)->with(['unit', 'entries.sourceEntry', 'attachments'])->latest()->paginate(10)]);
     }
 }

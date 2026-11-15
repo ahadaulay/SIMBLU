@@ -38,6 +38,7 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/report-attachments/{attachment}', [ReportController::class, 'attachment'])->name('reports.attachment');
         Route::get('/report-history/{history}', [ReportController::class, 'history'])->name('reports.history');
         Route::get('/recaps', [RecapController::class, 'index'])->name('recaps.index');
+        Route::get('/recaps/statistics', [RecapController::class, 'statistics'])->name('recaps.statistics');
         Route::get('/recaps/reference-2025-2026', [RecapController::class, 'referenceWorkbook'])
             ->name('recaps.reference-workbook');
         Route::get('/recaps/export', [RecapController::class, 'export'])->name('recaps.export');

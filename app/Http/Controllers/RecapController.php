@@ -50,6 +50,43 @@ class RecapController extends Controller
         return view('Admin.Recap.index');
     }
 
+    public function statistics(Request $request, ReportRecap $recap): View
+    {
+        $filters = $request->only(['periods', 'units', 'indicators', 'metrics', 'grouping']) + [
+            'units' => [],
+            'indicators' => [],
+        ];
+        $result = $recap->build($filters);
+        $rows = collect($result['rows']);
+        $numericRows = $rows->filter(fn (array $row): bool => is_numeric($row['value']));
+        $chartRows = $numericRows
+            ->sortByDesc(fn (array $row): float => max(
+                abs((float) $row['value']),
+                abs((float) ($row['previous_value'] ?? 0)),
+            ))
+            ->take(12)
+            ->values();
+        $statistics = [
+            'periods' => count($result['periods']),
+            'units' => $rows->pluck('unit')->unique()->count(),
+            'indicators' => $rows->pluck('code')->unique()->count(),
+            'sources' => $rows->flatMap(fn (array $row): array => array_column($row['sources'], 'id'))->unique()->count(),
+            'missing' => count($result['missing']),
+        ];
+        $conditions = collect(['NAIK', 'SAMA', 'TURUN', 'Tidak dapat dibandingkan'])
+            ->mapWithKeys(fn (string $condition): array => [
+                $condition => $rows->where('condition', $condition)->count(),
+            ]);
+
+        return view('Admin.Recap.statistics', [
+            'result' => $result,
+            'statistics' => $statistics,
+            'conditions' => $conditions,
+            'chartRows' => $chartRows,
+            'query' => http_build_query($filters),
+        ]);
+    }
+
     public function export(
         Request $request,
         ReportRecap $recap,

@@ -37,17 +37,25 @@ class Reporting2025DummySeederTest extends TestCase
             ->where('reporting_periods.year', 2025)
             ->where('unit_reports.status', 'VERIFIED')
             ->count());
-        $this->assertDatabaseCount('report_entries', 264);
+        $this->assertSame(264, DB::table('report_entries')
+            ->join('unit_reports', 'unit_reports.id', '=', 'report_entries.report_id')
+            ->join('reporting_periods', 'reporting_periods.id', '=', 'unit_reports.period_id')
+            ->where('reporting_periods.year', 2025)
+            ->count());
 
         $calculator = app(IndicatorCalculator::class);
-        ReportEntry::query()->each(function (ReportEntry $entry) use ($calculator): void {
-            $normalized = $calculator->normalize($entry->definition, $entry->rows, true);
-            $this->assertNotEmpty($normalized);
+        ReportEntry::query()
+            ->whereHas('report.period', fn ($query) => $query->where('year', 2025))
+            ->each(function (ReportEntry $entry) use ($calculator): void {
+                $normalized = $calculator->normalize($entry->definition, $entry->rows, true);
+                $this->assertNotEmpty($normalized);
 
-            foreach ($normalized as $row) {
-                $this->assertNotEmpty($row['details']);
-            }
-        });
+                foreach ($normalized as $row) {
+                    if ($calculator->detailField($entry->definition)) {
+                        $this->assertNotEmpty($row['details']);
+                    }
+                }
+            });
 
         $achievement = ReportEntry::query()
             ->whereHas('report.period', fn ($query) => $query->where('year', 2025)->where('quarter', 1))
@@ -67,8 +75,8 @@ class Reporting2025DummySeederTest extends TestCase
 
         $this->seed(Reporting2025DummySeeder::class);
 
-        $this->assertDatabaseCount('unit_reports', 72);
-        $this->assertDatabaseCount('report_entries', 264);
+        $this->assertDatabaseCount('unit_reports', 144);
+        $this->assertDatabaseCount('report_entries', 528);
     }
 
     private function seedReportingData(): void

@@ -41,6 +41,9 @@ class ReportEditor extends Component
 
     public array $detailDraft = [];
 
+    #[Locked]
+    public array $previousEntries = [];
+
     public function boot(): void
     {
         Gate::authorize('reporting-access');
@@ -54,11 +57,55 @@ class ReportEditor extends Component
 
     public function reload(): void
     {
-        $report = UnitReport::with('entries')->findOrFail($this->reportId);
+        $report = UnitReport::with(['entries.sourceEntry', 'period.cycle'])->findOrFail($this->reportId);
         Gate::authorize('reporting-view', $report);
+        $workflow = app(ReportWorkflow::class);
+        $previous = $workflow->previousContext($report);
         $this->version = $report->version;
-        $this->sections = $report->entries->mapWithKeys(fn ($entry) => [$entry->id => ['rows' => $entry->rows, 'no_activity' => $entry->no_activity, 'explanation' => $entry->explanation ?? '', 'responsible_name' => $entry->responsible_name ?? '']])->all();
+        $this->previousEntries = [];
+        $this->sections = $report->entries->mapWithKeys(function ($entry) use ($previous, $workflow): array {
+            $previousEntry = $previous['entries']->get($entry->indicator_id);
+            $isLinked = $previousEntry && $entry->source_entry_id === $previousEntry->id;
+
+            // A linked entry keeps its checkbox so the user can still unlink it after the source was emptied.
+            if ($workflow->canUsePrevious($entry, $previousEntry) || $isLinked) {
+                $this->previousEntries[$entry->id] = [
+                    'entry_id' => $previousEntry->id,
+                    'period' => $previous['period']->label,
+                ];
+            }
+
+            return [$entry->id => [
+                'rows' => $entry->effectiveRows(),
+                'no_activity' => $entry->effectiveNoActivity(),
+                'use_previous' => $entry->source_entry_id !== null,
+                'explanation' => $entry->explanation ?? '',
+                'responsible_name' => $entry->responsible_name ?? '',
+            ]];
+        })->all();
         $this->resetValidation();
+    }
+
+    public function togglePrevious(int $entryId, bool $usePrevious, ReportWorkflow $workflow): void
+    {
+        $report = UnitReport::findOrFail($this->reportId);
+        $workflow->assertEditable($report);
+        $entry = $report->entries()->findOrFail($entryId);
+        abort_unless(isset($this->previousEntries[$entryId]), 404);
+
+        $this->sections[$entryId]['use_previous'] = $usePrevious;
+
+        if ($usePrevious) {
+            $source = $entry->newQuery()->findOrFail($this->previousEntries[$entryId]['entry_id']);
+            abort_unless($workflow->canUsePrevious($entry, $source), 422, 'Data triwulan sebelumnya belum diisi.');
+            $this->sections[$entryId]['rows'] = $source->effectiveRows();
+            $this->sections[$entryId]['no_activity'] = $source->effectiveNoActivity();
+        } else {
+            $this->sections[$entryId]['rows'] = $entry->rows;
+            $this->sections[$entryId]['no_activity'] = $entry->no_activity;
+        }
+
+        $this->resetValidation('sections.'.$entryId);
     }
 
     public function addRow(int $entryId, ReportWorkflow $workflow): void
@@ -67,6 +114,7 @@ class ReportEditor extends Component
         $workflow->assertEditable($report);
         $entry = $report->entries()->findOrFail($entryId);
         abort_unless($entry->definition['form_type'] === 'DYNAMIC', 403);
+        abort_if($this->sections[$entryId]['use_previous'] ?? false, 403);
         if (count($this->sections[$entryId]['rows']) < 500) {
             $this->sections[$entryId]['no_activity'] = false;
             $this->sections[$entryId]['rows'][] = ['key' => (string) Str::uuid(), 'label' => '', 'values' => array_fill_keys(array_column($entry->definition['fields'], 'code'), null), 'details' => []];
@@ -78,6 +126,7 @@ class ReportEditor extends Component
         $report = UnitReport::findOrFail($this->reportId);
         $workflow->assertEditable($report);
         abort_unless($report->entries()->findOrFail($entryId)->definition['form_type'] === 'DYNAMIC', 403);
+        abort_if($this->sections[$entryId]['use_previous'] ?? false, 403);
         unset($this->sections[$entryId]['rows'][$index]);
         $this->sections[$entryId]['rows'] = array_values($this->sections[$entryId]['rows']);
     }
@@ -165,6 +214,7 @@ class ReportEditor extends Component
         $entry = $report->entries()->findOrFail($this->detailEntryId);
         abort_unless(app(IndicatorCalculator::class)->detailField($entry->definition), 404);
         abort_unless(isset($this->sections[$entry->id]['rows'][$this->detailRowIndex]), 404);
+        abort_if($this->sections[$entry->id]['use_previous'] ?? false, 403);
     }
 
     public function save(ReportWorkflow $workflow): void
@@ -290,7 +340,7 @@ class ReportEditor extends Component
 
     public function render(): View
     {
-        $report = UnitReport::with(['unit', 'period', 'entries', 'attachments', 'notes.user'])->findOrFail($this->reportId);
+        $report = UnitReport::with(['unit', 'period', 'entries.sourceEntry', 'attachments', 'notes.user'])->findOrFail($this->reportId);
         Gate::authorize('reporting-view', $report);
         $editable = auth()->user()->hasReportingRole(['UNIT']) && in_array($report->status, ['DRAFT', 'REVISION']) && $report->period->status === 'OPEN';
         $selectedDetail = null;
@@ -332,6 +382,10 @@ class ReportEditor extends Component
             }
         }
 
-        return view('livewire.report-editor', ['report' => $report, 'editable' => $editable, 'histories' => $report->histories()->with('user')->latest('id')->limit(30)->get(), 'completion' => app(ReportWorkflow::class)->completion($report), 'selectedDetail' => $selectedDetail]);
+        $detailEditable = $selectedDetail
+            && $editable
+            && ! ($this->sections[$selectedDetail['entry_id']]['use_previous'] ?? false);
+
+        return view('livewire.report-editor', ['report' => $report, 'editable' => $editable, 'detailEditable' => $detailEditable, 'histories' => $report->histories()->with('user')->latest('id')->limit(30)->get(), 'completion' => app(ReportWorkflow::class)->completion($report), 'selectedDetail' => $selectedDetail]);
     }
 }

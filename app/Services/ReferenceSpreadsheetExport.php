@@ -52,53 +52,75 @@ class ReferenceSpreadsheetExport
             'style' => 1,
         ], [
             'values' => [],
-        ], [
-            'values' => [
-                'No',
-                'Indikator',
-                'Tahun Sebelumnya',
-                'Tahun Berjalan',
-                'Kondisi (SAMA/NAIK/TURUN)',
-                'Penjelasan Penyebab Kondisi',
-                'Penanggung Jawab',
-                'Nama ASN Penanggung Jawab',
-            ],
-            'style' => 2,
         ]];
+        $summaryMerges = ['A1:H1'];
 
-        $number = 1;
-        $lastCategory = null;
-
-        foreach ($result['rows'] as $row) {
-            if ($lastCategory !== $row['category']) {
-                $summaryRows[] = [
-                    'values' => [$row['category']],
-                    'style' => 3,
-                ];
-                $lastCategory = $row['category'];
-            }
-
-            $sources = collect($row['sources']);
+        foreach (range(1, 4) as $quarter) {
+            $quarterRows = collect($result['rows'])
+                ->filter(fn (array $row): bool => preg_match('/^TW\s+'.$quarter.'\s*\//i', $row['group']) === 1)
+                ->values();
+            $titleRow = count($summaryRows) + 1;
+            $summaryRows[] = [
+                'values' => ['PERBANDINGAN TW '.$quarter.' DENGAN TW '.$quarter.' TAHUN SEBELUMNYA'],
+                'style' => 1,
+            ];
+            $summaryMerges[] = 'A'.$titleRow.':H'.$titleRow;
             $summaryRows[] = [
                 'values' => [
-                    $number++,
-                    $row['indicator'].' - '.$row['group'],
-                    $row['previous_value'],
-                    $row['value'],
-                    $row['condition'],
-                    $sources->pluck('explanation')->filter()->unique()->implode('; '),
-                    $row['unit'],
-                    $sources->pluck('responsible_name')->filter()->unique()->implode(', '),
+                    'No',
+                    'Indikator',
+                    'TW '.$quarter.' Tahun Sebelumnya',
+                    'TW '.$quarter.' Tahun Berjalan',
+                    'Kondisi (SAMA/NAIK/TURUN)',
+                    'Penjelasan Penyebab Kondisi',
+                    'Penanggung Jawab',
+                    'Nama ASN Penanggung Jawab',
                 ],
-                'style' => 4,
+                'style' => 2,
             ];
+
+            $number = 1;
+            $lastCategory = null;
+
+            foreach ($quarterRows as $row) {
+                if ($lastCategory !== $row['category']) {
+                    $categoryRow = count($summaryRows) + 1;
+                    $summaryRows[] = [
+                        'values' => [$row['category']],
+                        'style' => 3,
+                    ];
+                    $summaryMerges[] = 'A'.$categoryRow.':H'.$categoryRow;
+                    $lastCategory = $row['category'];
+                }
+
+                $sources = collect($row['sources']);
+                $summaryRows[] = [
+                    'values' => [
+                        $number++,
+                        $row['indicator'].' - '.$row['group'],
+                        $row['previous_value'],
+                        $row['value'],
+                        $row['condition'],
+                        $sources->pluck('explanation')->filter()->unique()->implode('; '),
+                        $row['unit'],
+                        $sources->pluck('responsible_name')->filter()->unique()->implode(', '),
+                    ],
+                    'style' => 4,
+                ];
+            }
+
+            if ($quarterRows->isEmpty()) {
+                $summaryRows[] = ['values' => ['', 'Belum ada laporan terverifikasi untuk TW '.$quarter.'.'], 'style' => 4];
+            }
+
+            $summaryRows[] = ['values' => []];
         }
 
         $sheets = [[
             'name' => 'REKAP DATA',
             'rows' => $summaryRows,
             'widths' => [7, 52, 18, 18, 22, 48, 28, 30],
-            'merges' => ['A1:H1'],
+            'merges' => $summaryMerges,
         ]];
 
         $rowsByUnit = collect($result['rows'])->groupBy('unit');
@@ -150,42 +172,60 @@ class ReferenceSpreadsheetExport
         return $sheets;
     }
 
-    /**
-     * Uraikan rincian baris per butir menjadi baris terpisah di bawah baris agregat.
-     * Berlaku untuk indikator DYNAMIC (uraian bebas, mis. "Kamboja 100") dan FIXED (butir baku).
-     * Kolom "Tahun Sebelumnya" dikosongkan karena nilai pembanding hanya tersedia sebagai agregat.
-     */
     private function detailRows(Collection $indicatorRows, Collection $periods): array
     {
         $definition = $indicatorRows->first()['definition'] ?? null;
 
-        if (! in_array($definition['form_type'] ?? null, ['DYNAMIC', 'FIXED'], true)) {
+        if (! $definition) {
             return [];
         }
 
-        $resultField = $definition['result_field'];
-        $labels = [];
-        $valuesByPeriodAndLabel = [];
+        $records = [];
 
         foreach ($indicatorRows as $indicatorRow) {
             foreach ($indicatorRow['sources'] ?? [] as $source) {
-                foreach ($source['rows'] ?? [] as $detail) {
-                    $label = trim((string) ($detail['label'] ?? ''));
+                $period = $source['period'] ?? null;
+
+                if ($period === null) {
+                    continue;
+                }
+
+                foreach ($source['rows'] ?? [] as $row) {
+                    $label = trim((string) ($row['label'] ?? ''));
+                    $rowKey = (string) ($row['key'] ?? $label);
 
                     if ($label === '') {
                         continue;
                     }
 
-                    if (! in_array($label, $labels, true)) {
-                        $labels[] = $label;
+                    foreach ($definition['fields'] as $field) {
+                        $value = $row['values'][$field['code']] ?? null;
+
+                        if ($value === null || $value === '') {
+                            continue;
+                        }
+
+                        $key = 'field:'.$rowKey.':'.$field['code'];
+                        $records[$key]['label'] ??= '• '.$label.(count($definition['fields']) > 1 ? ' — '.$field['label'] : '');
+                        $records[$key]['values'][$period] = $this->mergeDetailValue(
+                            $records[$key]['values'][$period] ?? null,
+                            $value,
+                        );
                     }
 
-                    $period = $source['period'] ?? null;
-                    $value = $detail['values'][$resultField] ?? null;
+                    foreach ($row['details'] ?? [] as $detail) {
+                        $name = trim((string) ($detail['name'] ?? ''));
 
-                    if ($period !== null && is_numeric($value)) {
-                        $valuesByPeriodAndLabel[$period][$label]
-                            = ($valuesByPeriodAndLabel[$period][$label] ?? 0) + (float) $value;
+                        if ($name === '') {
+                            continue;
+                        }
+
+                        $key = 'detail:'.$rowKey.':'.$name;
+                        $records[$key]['label'] ??= '   ↳ '.$name.' ('.$label.')';
+                        $records[$key]['values'][$period] = $this->mergeDetailValue(
+                            $records[$key]['values'][$period] ?? null,
+                            $detail['amount'] ?? null,
+                        );
                     }
                 }
             }
@@ -193,18 +233,29 @@ class ReferenceSpreadsheetExport
 
         $detailRows = [];
 
-        foreach ($labels as $label) {
-            $values = ['', '• '.$label];
+        foreach ($records as $record) {
+            $values = ['', $record['label']];
 
             foreach ($periods as $period) {
                 $values[] = null;
-                $values[] = $valuesByPeriodAndLabel[$period][$label] ?? null;
+                $values[] = $record['values'][$period] ?? null;
             }
 
             $detailRows[] = $values;
         }
 
         return $detailRows;
+    }
+
+    private function mergeDetailValue(mixed $current, mixed $value): mixed
+    {
+        if ($value === null || $value === '') {
+            return $current;
+        }
+
+        return is_numeric($current) && is_numeric($value)
+            ? (float) $current + (float) $value
+            : $value;
     }
 
     private function sheet(array $rows, array $widths, array $merges): string
@@ -221,7 +272,14 @@ class ReferenceSpreadsheetExport
         foreach ($rows as $rowIndex => $row) {
             $excelRow = $rowIndex + 1;
             $style = $row['style'] ?? 0;
-            $data .= '<row r="'.$excelRow.'">';
+            $height = match ($style) {
+                1 => 28,
+                2 => 38,
+                3 => 24,
+                4 => 30,
+                default => 18,
+            };
+            $data .= '<row r="'.$excelRow.'" ht="'.$height.'" customHeight="1">';
 
             foreach ($row['values'] as $columnIndex => $value) {
                 $reference = $this->columnName($columnIndex + 1).$excelRow;
@@ -237,7 +295,7 @@ class ReferenceSpreadsheetExport
 
         return '<?xml version="1.0" encoding="UTF-8"?>'
             .'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
-            .'<sheetViews><sheetView workbookViewId="0"><pane ySplit="3" topLeftCell="A4" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>'
+            .'<sheetViews><sheetView workbookViewId="0"/></sheetViews>'
             .'<cols>'.$columns.'</cols><sheetData>'.$data.'</sheetData>'.$mergeXml
             .'<pageMargins left="0.25" right="0.25" top="0.5" bottom="0.5" header="0.2" footer="0.2"/>'
             .'<pageSetup orientation="landscape" fitToWidth="1" fitToHeight="0"/>'

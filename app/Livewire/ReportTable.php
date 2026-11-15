@@ -44,7 +44,7 @@ class ReportTable extends Component
 
     public function render(): View
     {
-        $query = UnitReport::with(['period', 'unit', 'entries', 'attachments'])
+        $query = UnitReport::with(['period', 'unit', 'entries.sourceEntry', 'attachments'])
             ->when(auth()->user()->role === 'UNIT', fn ($q) => $q->where('unit_id', auth()->user()->unit_id))
             ->when($this->periodId !== '', fn ($q) => $q->where('period_id', $this->periodId))
             ->when($this->status !== '', fn ($q) => $q->where('status', $this->status))

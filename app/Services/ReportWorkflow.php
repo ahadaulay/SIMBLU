@@ -106,13 +106,14 @@ class ReportWorkflow
             abort_unless($report->status === 'DRAFT', 403, 'Impor hanya boleh ke draf.');
 
             $entry = $report->entries()->where('indicator_id', $indicatorId)->firstOrFail();
-            $alreadyFilled = collect($entry->rows)->contains(
+            $effectiveRows = $entry->effectiveRows();
+            $alreadyFilled = collect($effectiveRows)->contains(
                 fn ($row) => collect($row['values'])->contains(
                     fn ($value) => $value !== null && $value !== ''
                 )
             );
 
-            if ($alreadyFilled || $entry->no_activity) {
+            if ($entry->source_entry_id || $alreadyFilled || $entry->effectiveNoActivity()) {
                 throw ValidationException::withMessages([
                     'file' => 'Indikator sudah memiliki data. Impor tidak boleh menimpa isian.',
                 ]);
@@ -150,6 +151,51 @@ class ReportWorkflow
                 'report' => 'Laporan tidak dapat diubah karena periode pengisian belum dibuka atau sudah ditutup.',
             ]);
         }
+    }
+
+    public function previousContext(UnitReport $report): array
+    {
+        $report->loadMissing('period.cycle');
+
+        if ($report->period->cycle?->frequency !== 'QUARTERLY') {
+            return ['period' => null, 'entries' => collect()];
+        }
+
+        $quarter = $report->period->quarter === 1 ? 4 : $report->period->quarter - 1;
+        $year = $report->period->quarter === 1 ? $report->period->year - 1 : $report->period->year;
+        $period = ReportingPeriod::with('cycle')
+            ->where('year', $year)
+            ->where('quarter', $quarter)
+            ->whereHas('cycle', fn ($query) => $query->where('frequency', 'QUARTERLY'))
+            ->first();
+
+        if (! $period) {
+            return ['period' => null, 'entries' => collect()];
+        }
+
+        $previousReport = UnitReport::with('entries.sourceEntry')
+            ->where('unit_id', $report->unit_id)
+            ->where('period_id', $period->id)
+            ->first();
+
+        return [
+            'period' => $period,
+            'entries' => $previousReport?->entries->keyBy('indicator_id') ?? collect(),
+        ];
+    }
+
+    public function canUsePrevious(ReportEntry $entry, ?ReportEntry $previousEntry): bool
+    {
+        // The definition version pins the same indicator items, so only filled previous data may be referenced.
+        if (! $previousEntry || $previousEntry->definition['version'] !== $entry->definition['version']) {
+            return false;
+        }
+
+        return collect($previousEntry->effectiveRows())->contains(
+            fn ($row) => collect($row['values'] ?? [])->contains(
+                fn ($value) => $value !== null && $value !== ''
+            )
+        );
     }
 
     public function locked(int $id, int $version): UnitReport
@@ -198,6 +244,8 @@ class ReportWorkflow
             ]);
         }
 
+        $previousEntries = $this->previousContext($report)['entries'];
+
         foreach ($report->entries as $entry) {
             $section = $sections[$entry->id];
             $prefix = 'sections.'.$entry->id.'.';
@@ -206,30 +254,49 @@ class ReportWorkflow
                 Validator::make($section, [
                     'rows' => ['present', 'array'],
                     'no_activity' => ['required', 'boolean'],
+                    'use_previous' => ['required', 'boolean'],
                     'explanation' => ['nullable', 'string', 'max:10000'],
                     'responsible_name' => ['nullable', 'string', 'max:150'],
                 ], [], [
                     'rows' => 'daftar butir',
                     'no_activity' => 'pilihan tidak ada kegiatan',
+                    'use_previous' => 'pilihan data triwulan sebelumnya',
                     'explanation' => 'penjelasan',
                     'responsible_name' => 'nama penanggung jawab',
                 ])->validate();
-                $hasValues = collect($section['rows'])->contains(
+                $sourceEntry = null;
+                $rowsToValidate = $section['rows'];
+                $noActivity = (bool) $section['no_activity'];
+
+                if ($section['use_previous']) {
+                    $sourceEntry = $previousEntries->get($entry->indicator_id);
+
+                    if (! $this->canUsePrevious($entry, $sourceEntry)) {
+                        throw ValidationException::withMessages([
+                            'use_previous' => 'Data indikator pada triwulan sebelumnya belum diisi, tidak tersedia, atau versinya berbeda.',
+                        ]);
+                    }
+
+                    $rowsToValidate = $sourceEntry->effectiveRows();
+                    $noActivity = $sourceEntry->effectiveNoActivity();
+                }
+
+                $hasValues = collect($rowsToValidate)->contains(
                     fn ($row) => collect($row['values'] ?? [])->contains(
                         fn ($value) => $value !== null && $value !== ''
                     )
                 );
-                $needed = $complete && ($entry->required || $hasValues || $section['no_activity']);
+                $needed = $complete && ($entry->required || $hasValues || $noActivity);
                 $rows = $this->calculator->normalize(
                     $entry->definition,
-                    $section['rows'],
+                    $rowsToValidate,
                     $needed,
-                    (bool) $section['no_activity'],
+                    $noActivity,
                 );
             } catch (ValidationException $e) {
                 throw $this->contextualValidation($entry, $section, $prefix, $e);
             }
-            if ($needed && ($entry->definition['requires_explanation'] || $section['no_activity']) && blank($section['explanation'])) {
+            if ($needed && ($entry->definition['requires_explanation'] || $noActivity) && blank($section['explanation'])) {
                 throw ValidationException::withMessages([
                     $prefix.'explanation' => $this->entryContext($entry, $section).' Isi penjelasan, termasuk alasan tidak ada kegiatan.',
                 ]);
@@ -240,8 +307,9 @@ class ReportWorkflow
                 ]);
             }
             $entry->update([
+                'source_entry_id' => $sourceEntry?->id,
                 'rows' => $rows,
-                'no_activity' => $section['no_activity'],
+                'no_activity' => $noActivity,
                 'explanation' => $section['explanation'],
                 // Penanggung jawab berasal dari master penugasan dan tidak dapat diganti saat mengisi laporan.
                 'responsible_name' => $entry->responsible_name,
@@ -305,12 +373,13 @@ class ReportWorkflow
                 }
                 $sections = $report->entries
                     ->mapWithKeys(fn ($entry) => [
-                        $entry->id => $entry->only([
-                            'rows',
-                            'no_activity',
-                            'explanation',
-                            'responsible_name',
-                        ]),
+                        $entry->id => [
+                            'rows' => $entry->effectiveRows(),
+                            'no_activity' => $entry->effectiveNoActivity(),
+                            'use_previous' => $entry->source_entry_id !== null,
+                            'explanation' => $entry->explanation,
+                            'responsible_name' => $entry->responsible_name,
+                        ],
                     ])
                     ->all();
                 $this->validateSections($report, $sections, true);
@@ -339,7 +408,13 @@ class ReportWorkflow
             'snapshot' => [
                 'version' => $report->version,
                 'unit' => $report->unit->only(['id', 'code', 'name']),
-                'entries' => $report->entries()->get()->toArray(),
+                'entries' => $report->entries()->with('sourceEntry')->get()->map(function (ReportEntry $entry): array {
+                    $snapshot = $entry->toArray();
+                    $snapshot['rows'] = $entry->effectiveRows();
+                    $snapshot['no_activity'] = $entry->effectiveNoActivity();
+
+                    return $snapshot;
+                })->all(),
                 'attachments' => $report->attachments()->get()->toArray(),
             ],
             'created_at' => now(),
@@ -355,8 +430,9 @@ class ReportWorkflow
         $valid = 0;
         foreach ($entries as $entry) {
             try {
-                $this->calculator->normalize($entry->definition, $entry->rows, true, $entry->no_activity);
-                if (($entry->definition['requires_explanation'] || $entry->no_activity) && blank($entry->explanation)) {
+                $noActivity = $entry->effectiveNoActivity();
+                $this->calculator->normalize($entry->definition, $entry->effectiveRows(), true, $noActivity);
+                if (($entry->definition['requires_explanation'] || $noActivity) && blank($entry->explanation)) {
                     continue;
                 }
                 if ($entry->definition['requires_attachment'] && ! $report->attachments->contains('entry_id', $entry->id)) {

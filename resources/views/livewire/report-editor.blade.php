@@ -65,16 +65,33 @@
     @foreach($report->entries as $entry)
         @php($definition = $entry->definition)
         @php($detailField = app(\App\Services\IndicatorCalculator::class)->detailField($definition))
+        @php($entryEditable = $editable && !($sections[$entry->id]['use_previous'] ?? false))
         <section class="card p-3 report-entry" wire:key="entry-{{ $entry->id }}">
             <h5 class="report-entry-title d-flex justify-content-between align-items-baseline gap-3">
                 <span>{{ $loop->iteration }}. {{ $definition['name'] }}</span>
                 <small class="text-muted text-nowrap">{{ $entry->required ? 'Wajib' : 'Opsional' }} · v{{ $definition['version'] }}</small>
             </h5>
             <p>{{ $definition['description'] }}</p>
-            <fieldset @disabled(!$editable)>
+            <fieldset>
+                @if(isset($previousEntries[$entry->id]))
+                    <label class="mb-3 d-block">
+                        <input
+                            type="checkbox"
+                            @checked($sections[$entry->id]['use_previous'])
+                            wire:change="togglePrevious({{ $entry->id }}, $event.target.checked)"
+                            @disabled(!$editable)
+                        >
+                        Sama seperti triwulan sebelumnya ({{ $previousEntries[$entry->id]['period'] }})
+                    </label>
+                    @if($sections[$entry->id]['use_previous'])
+                        <div class="alert alert-info py-2">
+                            Data mengikuti {{ $previousEntries[$entry->id]['period'] }} dan berubah otomatis saat data rujukan berubah.
+                        </div>
+                    @endif
+                @endif
                 @if($definition['form_type'] === 'DYNAMIC')
                     <label class="mb-3">
-                        <input type="checkbox" wire:model="sections.{{ $entry->id }}.no_activity"> Tidak ada kegiatan (hapus baris kosong dan isi alasannya)</label>
+                        <input type="checkbox" wire:model="sections.{{ $entry->id }}.no_activity" @disabled(!$entryEditable)> Tidak ada kegiatan (hapus baris kosong dan isi alasannya)</label>
                     @endif
                     <div class="table-responsive">
                         <table class="table table-bordered align-middle">
@@ -88,7 +105,7 @@
                                     @if($detailField)
                                         <th>Detail <small class="d-block">Opsional</small></th>
                                     @endif
-                                    @if($editable && $definition['form_type'] === 'DYNAMIC')
+                                    @if($entryEditable && $definition['form_type'] === 'DYNAMIC')
                                         <th>Aksi</th>
                                     @endif
                                 </tr>
@@ -100,7 +117,7 @@
                                             @if($definition['form_type'] === 'DYNAMIC')
                                                 @php($labelPath = 'sections.'.$entry->id.'.rows.'.$index.'.label')
                                                 <label class="visually-hidden" for="row-{{ $entry->id }}-{{ $index }}">Uraian baris</label>
-                                                <input id="row-{{ $entry->id }}-{{ $index }}" class="form-control @error($labelPath) is-invalid @enderror" wire:model="{{ $labelPath }}">
+                                                <input id="row-{{ $entry->id }}-{{ $index }}" class="form-control @error($labelPath) is-invalid @enderror" wire:model="{{ $labelPath }}" @disabled(!$entryEditable)>
                                                 @error($labelPath)<div class="invalid-feedback">{{ $message }}</div>@enderror
                                             @else
                                                 {{ $row['label'] }}
@@ -115,20 +132,20 @@
                                                     <output id="{{ $inputId }}">{{ app(\App\Services\IndicatorCalculator::class)->fieldValue($field, $row['values']) ?? '—' }}</output>
                                                     <small class="text-muted d-block">Dihitung saat simpan</small>
                                                 @elseif($field['type'] === 'CHOICE')
-                                                    <select id="{{ $inputId }}" class="form-select @error($path) is-invalid @enderror" wire:model="{{ $path }}">
+                                                    <select id="{{ $inputId }}" class="form-select @error($path) is-invalid @enderror" wire:model="{{ $path }}" @disabled(!$entryEditable)>
                                                         <option value="">Pilih</option>
                                                         @foreach(app(\App\Services\IndicatorCalculator::class)->options($field) as $option)
                                                             <option value="{{ $option }}">{{ $option }}</option>
                                                         @endforeach
                                                     </select>
                                                 @elseif($field['type'] === 'BOOLEAN')
-                                                    <select id="{{ $inputId }}" class="form-select @error($path) is-invalid @enderror" wire:model="{{ $path }}">
+                                                    <select id="{{ $inputId }}" class="form-select @error($path) is-invalid @enderror" wire:model="{{ $path }}" @disabled(!$entryEditable)>
                                                         <option value="">Pilih</option>
                                                         <option value="1">Ya</option>
                                                         <option value="0">Tidak</option>
                                                     </select>
                                                 @else
-                                                    <input id="{{ $inputId }}" class="form-control @error($path) is-invalid @enderror" type="{{ $field['type'] === 'NUMBER' ? 'number' : ($field['type'] === 'DATE' ? 'date' : 'text') }}" step="any" wire:model="{{ $path }}">
+                                                    <input id="{{ $inputId }}" class="form-control @error($path) is-invalid @enderror" type="{{ $field['type'] === 'NUMBER' ? 'number' : ($field['type'] === 'DATE' ? 'date' : 'text') }}" step="any" wire:model="{{ $path }}" @disabled(!$entryEditable)>
                                                 @endif
                                                 @error($path)
                                                     <div class="text-danger">{{ $message }}</div>
@@ -145,7 +162,7 @@
                                                 @enderror
                                             </td>
                                         @endif
-                                        @if($editable && $definition['form_type'] === 'DYNAMIC')
+                                        @if($entryEditable && $definition['form_type'] === 'DYNAMIC')
                                             <td>
                                                 <button type="button" class="btn btn-sm btn-outline-danger" wire:click="removeRow({{ $entry->id }},{{ $index }})" wire:confirm="Hapus baris dari draf ini?">Hapus</button>
                                             </td>
@@ -155,13 +172,13 @@
                             </tbody>
                         </table>
                     </div>
-                    @if($editable && $definition['form_type'] === 'DYNAMIC')
+                    @if($entryEditable && $definition['form_type'] === 'DYNAMIC')
                         <button type="button" class="btn btn-outline-primary mb-3" wire:click="addRow({{ $entry->id }})">Tambah baris</button>
                     @endif
                     <div class="row g-3">
                         <div class="col-md-8">
                             <label for="explanation-{{ $entry->id }}">Penjelasan / alasan kondisi</label>
-                            <textarea id="explanation-{{ $entry->id }}" class="form-control @error('sections.'.$entry->id.'.explanation') is-invalid @enderror" wire:model="sections.{{ $entry->id }}.explanation">
+                            <textarea id="explanation-{{ $entry->id }}" class="form-control @error('sections.'.$entry->id.'.explanation') is-invalid @enderror" wire:model="sections.{{ $entry->id }}.explanation" @disabled(!$editable)>
                             </textarea>
                             @error('sections.'.$entry->id.'.explanation')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
@@ -216,7 +233,7 @@
                                         <tr>
                                             <th>Nama</th>
                                             <th>Jumlah</th>
-                                            @if($editable)<th>Aksi</th>@endif
+                                            @if($detailEditable)<th>Aksi</th>@endif
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -224,32 +241,32 @@
                                             <tr wire:key="detail-{{ $selectedDetail['entry_id'] }}-{{ $selectedDetail['row_index'] }}-{{ $detailIndex }}">
                                                 <td>
                                                     <label class="visually-hidden" for="detail-name-{{ $detailIndex }}">Nama detail</label>
-                                                    <input id="detail-name-{{ $detailIndex }}" class="form-control" type="text" wire:model="detailDraft.{{ $detailIndex }}.name" @disabled(!$editable)>
+                                                    <input id="detail-name-{{ $detailIndex }}" class="form-control" type="text" wire:model="detailDraft.{{ $detailIndex }}.name" @disabled(!$detailEditable)>
                                                     @error('detailDraft.'.$detailIndex.'.name')<div class="text-danger small">{{ $message }}</div>@enderror
                                                 </td>
                                                 <td>
                                                     <label class="visually-hidden" for="detail-amount-{{ $detailIndex }}">Jumlah detail</label>
-                                                    <input id="detail-amount-{{ $detailIndex }}" class="form-control" type="number" min="0" step="any" wire:model.live.debounce.300ms="detailDraft.{{ $detailIndex }}.amount" @disabled(!$editable)>
+                                                    <input id="detail-amount-{{ $detailIndex }}" class="form-control" type="number" min="0" step="any" wire:model.live.debounce.300ms="detailDraft.{{ $detailIndex }}.amount" @disabled(!$detailEditable)>
                                                     @error('detailDraft.'.$detailIndex.'.amount')<div class="text-danger small">{{ $message }}</div>@enderror
                                                 </td>
-                                                @if($editable)
+                                                @if($detailEditable)
                                                     <td><button type="button" class="btn btn-sm btn-outline-danger" wire:click="removeDetailRow({{ $detailIndex }})">Hapus</button></td>
                                                 @endif
                                             </tr>
                                         @empty
-                                            <tr><td colspan="{{ $editable ? 3 : 2 }}" class="text-center text-muted">Belum ada detail.</td></tr>
+                                            <tr><td colspan="{{ $detailEditable ? 3 : 2 }}" class="text-center text-muted">Belum ada detail.</td></tr>
                                         @endforelse
                                     </tbody>
                                     <tfoot>
                                         <tr>
                                             <th>Total detail</th>
                                             <th>{{ number_format((float) $selectedDetail['total'], (int) $selectedDetail['field']['decimals'], ',', '.') }}</th>
-                                            @if($editable)<th></th>@endif
+                                            @if($detailEditable)<th></th>@endif
                                         </tr>
                                         <tr>
                                             <th>Nilai utama</th>
                                             <th>{{ is_numeric($selectedDetail['target']) ? number_format((float) $selectedDetail['target'], (int) $selectedDetail['field']['decimals'], ',', '.') : 'Belum diisi' }}</th>
-                                            @if($editable)<th></th>@endif
+                                            @if($detailEditable)<th></th>@endif
                                         </tr>
                                     </tfoot>
                                 </table>
@@ -260,13 +277,13 @@
                                 </div>
                             @endif
                             @error('detailDraft')<div class="alert alert-danger" role="alert">{{ $message }}</div>@enderror
-                            @if($editable)
+                            @if($detailEditable)
                                 <button type="button" class="btn btn-outline-primary" wire:click="addDetailRow">Tambah baris</button>
                             @endif
                         @endif
                     </div>
                     <div class="modal-footer">
-                        @if($editable)
+                        @if($detailEditable)
                             <button
                                 id="finish-report-detail"
                                 type="button"

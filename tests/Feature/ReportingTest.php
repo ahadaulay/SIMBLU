@@ -359,6 +359,65 @@ class ReportingTest extends TestCase
         $this->get(route('reports.history', $old))->assertOk()->assertSee('Mahasiswa baru');
     }
 
+    public function test_admin_can_reset_only_the_selected_report_to_a_blank_draft(): void
+    {
+        Storage::fake('local');
+        $report = $this->start();
+        $entry = $report->entries()->firstOrFail();
+
+        Livewire::test(ReportEditor::class, ['reportId' => $report->id])
+            ->set('sections.'.$entry->id.'.rows.0.values.amount', 12)
+            ->set('sections.'.$entry->id.'.explanation', 'Data awal')
+            ->call('submit')
+            ->assertHasNoErrors();
+
+        Storage::disk('local')->put('reporting/'.$report->id.'/bukti.pdf', 'bukti');
+        $report->attachments()->create([
+            'entry_id' => $entry->id,
+            'uploaded_by' => $this->operator->id,
+            'name' => 'bukti.pdf',
+            'path' => 'reporting/'.$report->id.'/bukti.pdf',
+            'mime_type' => 'application/pdf',
+            'size' => 5,
+        ]);
+        $report->notes()->create([
+            'user_id' => $this->admin->id,
+            'note' => 'Catatan lama',
+        ]);
+
+        Livewire::test(ReportEditor::class, ['reportId' => $report->id])
+            ->call('resetReport')
+            ->assertForbidden();
+
+        $this->actingAs($this->admin);
+        Livewire::test(ReportEditor::class, ['reportId' => $report->id])
+            ->assertSee('Reset laporan ini')
+            ->assertSee('Semua isian indikator, detail, lampiran, dan catatan laporan ini akan dihapus.')
+            ->call('resetReport')
+            ->assertHasNoErrors()
+            ->assertSee('berhasil direset menjadi draf kosong');
+
+        $report->refresh();
+        $entry->refresh();
+
+        $this->assertSame('DRAFT', $report->status);
+        $this->assertNull($report->submitted_at);
+        $this->assertNull($report->verified_by);
+        $this->assertNull($report->verified_at);
+        $this->assertNull($entry->source_entry_id);
+        $this->assertFalse($entry->no_activity);
+        $this->assertNull($entry->explanation);
+        $this->assertNull($entry->rows[0]['values']['amount']);
+        $this->assertSame([], $entry->rows[0]['details']);
+        $this->assertCount(0, $report->attachments);
+        $this->assertCount(0, $report->notes);
+        Storage::disk('local')->assertMissing('reporting/'.$report->id.'/bukti.pdf');
+        $this->assertSame(
+            'Laporan direset oleh admin dan dikembalikan menjadi draf kosong.',
+            $report->histories()->latest('id')->firstOrFail()->note,
+        );
+    }
+
     public function test_other_units_cannot_read_change_or_download_report(): void
     {
         Storage::fake('local');

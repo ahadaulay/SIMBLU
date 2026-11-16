@@ -346,10 +346,14 @@
                             <button class="btn btn-outline-primary" wire:click="addNote" wire:loading.attr="disabled">Tambah catatan</button>
                             <button class="btn btn-warning" wire:click="transition('REVISION')" wire:loading.attr="disabled">Kembalikan untuk revisi</button>
                             <button class="btn btn-success" wire:click="transition('VERIFIED')" wire:confirm="Setujui dan kunci laporan sebagai sumber rekap resmi?" wire:loading.attr="disabled">Verifikasi dan kunci</button>
+                            <button class="btn btn-danger" wire:click="resetReport" wire:confirm="Reset laporan {{ $report->unit->name }} — {{ $report->period->label }}? Semua isian indikator, detail, lampiran, dan catatan laporan ini akan dihapus. Hanya laporan ini yang direset, tetapi laporan lain yang merujuk datanya akan otomatis membaca data kosong. Tindakan ini tidak dapat dibatalkan." wire:loading.attr="disabled">Reset laporan ini</button>
                         </div>
                     @else
                         <p class="text-muted">Pembukaan kembali mengeluarkan laporan ini dari rekap resmi sampai diverifikasi ulang. Arsip versi lama tetap tersedia.</p>
-                        <button class="btn btn-warning" wire:click="transition('REVISION')" wire:confirm="Buka kembali laporan dan keluarkan sementara dari rekap resmi?" wire:loading.attr="disabled">Buka kembali untuk revisi</button>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-warning" wire:click="transition('REVISION')" wire:confirm="Buka kembali laporan dan keluarkan sementara dari rekap resmi?" wire:loading.attr="disabled">Buka kembali untuk revisi</button>
+                            <button class="btn btn-danger" wire:click="resetReport" wire:confirm="Reset laporan {{ $report->unit->name }} — {{ $report->period->label }}? Semua isian indikator, detail, lampiran, dan catatan laporan ini akan dihapus. Hanya laporan ini yang direset, tetapi laporan lain yang merujuk datanya akan otomatis membaca data kosong. Tindakan ini tidak dapat dibatalkan." wire:loading.attr="disabled">Reset laporan ini</button>
+                        </div>
                     @endif
                 @endif
             @endcan

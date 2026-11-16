@@ -9,6 +9,7 @@ use App\Models\UnitReport;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -57,30 +58,12 @@ class ReportWorkflow
 
         foreach ($assignments as $assignment) {
             $definition = $assignment->indicator->definition();
-            $items = match ($definition['form_type']) {
-                'SINGLE' => [['code' => 'single', 'label' => $definition['name']]],
-                'FIXED' => $definition['items'],
-                default => [],
-            };
-            $rows = array_map(
-                fn ($item) => [
-                    'key' => $item['code'],
-                    'label' => $item['label'],
-                    'values' => array_fill_keys(
-                        array_column($definition['fields'], 'code'),
-                        null,
-                    ),
-                    'details' => [],
-                ],
-                $items,
-            );
-
             // Definisi indikator disalin agar laporan lama tidak berubah saat master diedit.
             $report->entries()->create([
                 'indicator_id' => $assignment->indicator_id,
                 'definition' => $definition,
                 'required' => $assignment->required,
-                'rows' => $rows,
+                'rows' => $this->blankRows($definition),
                 'responsible_name' => $assignment->responsible?->name,
             ]);
         }
@@ -88,6 +71,22 @@ class ReportWorkflow
         $this->history($report, null, 'Laporan dibuat.');
 
         return $report;
+    }
+
+    private function blankRows(array $definition): array
+    {
+        $items = match ($definition['form_type']) {
+            'SINGLE' => [['code' => 'single', 'label' => $definition['name']]],
+            'FIXED' => $definition['items'],
+            default => [],
+        };
+
+        return array_map(fn ($item) => [
+            'key' => $item['code'],
+            'label' => $item['label'],
+            'values' => array_fill_keys(array_column($definition['fields'], 'code'), null),
+            'details' => [],
+        ], $items);
     }
 
     public function import(int $periodId, int $unitId, int $indicatorId, array $rows, string $source): UnitReport
@@ -395,6 +394,53 @@ class ReportWorkflow
 
             return $report;
         });
+    }
+
+    public function resetReport(int $id, int $version): UnitReport
+    {
+        Gate::authorize('reporting-admin');
+        $attachmentPaths = [];
+
+        $report = DB::transaction(function () use ($id, $version, &$attachmentPaths): UnitReport {
+            $report = $this->locked($id, $version);
+            abort_if($report->period->status === 'LOCKED', 403, 'Buka periode terlebih dahulu sebelum mereset laporan.');
+            abort_unless(
+                in_array($report->status, ['SUBMITTED', 'VERIFIED'], true),
+                403,
+                'Hanya laporan yang diajukan atau sudah diverifikasi yang dapat direset.',
+            );
+
+            $from = $report->status;
+            $attachmentPaths = $report->attachments->pluck('path')->all();
+
+            foreach ($report->entries as $entry) {
+                $entry->update([
+                    'source_entry_id' => null,
+                    'rows' => $this->blankRows($entry->definition),
+                    'no_activity' => false,
+                    'explanation' => null,
+                ]);
+            }
+
+            $report->attachments()->delete();
+            $report->notes()->delete();
+            $report->update([
+                'status' => 'DRAFT',
+                'submitted_at' => null,
+                'verified_by' => null,
+                'verified_at' => null,
+                'version' => $report->version + 1,
+            ]);
+            $this->history($report, $from, 'Laporan direset oleh admin dan dikembalikan menjadi draf kosong.');
+
+            return $report;
+        });
+
+        if ($attachmentPaths !== []) {
+            Storage::disk('local')->delete($attachmentPaths);
+        }
+
+        return $report;
     }
 
     public function history(UnitReport $report, ?string $from, ?string $note): void

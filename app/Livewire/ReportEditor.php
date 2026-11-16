@@ -266,6 +266,20 @@ class ReportEditor extends Component
         session()->flash('success', 'Status laporan diperbarui.');
     }
 
+    public function resetReport(ReportWorkflow $workflow): void
+    {
+        $report = $workflow->resetReport($this->reportId, $this->version);
+        $this->note = '';
+        $this->noteEntryId = null;
+        $this->detailEntryId = null;
+        $this->detailRowIndex = null;
+        $this->detailDraft = [];
+        $this->uploads = [];
+        $this->reload();
+        $this->dispatch('close-report-detail-modal');
+        session()->flash('success', 'Laporan '.$report->unit->name.' — '.$report->period->label.' berhasil direset menjadi draf kosong.');
+    }
+
     public function addNote(ReportWorkflow $workflow): void
     {
         Gate::authorize('reporting-admin');

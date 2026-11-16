@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use RuntimeException;
 
 class ReportEntry extends Model
 {
@@ -27,37 +26,13 @@ class ReportEntry extends Model
         return $this->belongsTo(self::class, 'source_entry_id');
     }
 
-    public function effectiveRows(array $visited = []): array
+    public function effectiveRows(): array
     {
-        if (! $this->source_entry_id) {
-            return $this->rows;
-        }
-
-        if (in_array($this->id, $visited, true)) {
-            throw new RuntimeException('Rujukan data indikator membentuk lingkaran.');
-        }
-
-        $source = $this->relationLoaded('sourceEntry')
-            ? $this->getRelation('sourceEntry')
-            : $this->sourceEntry()->first();
-
-        return $source?->effectiveRows([...$visited, $this->id]) ?? $this->rows;
+        return $this->rows;
     }
 
-    public function effectiveNoActivity(array $visited = []): bool
+    public function effectiveNoActivity(): bool
     {
-        if (! $this->source_entry_id) {
-            return $this->no_activity;
-        }
-
-        if (in_array($this->id, $visited, true)) {
-            throw new RuntimeException('Rujukan data indikator membentuk lingkaran.');
-        }
-
-        $source = $this->relationLoaded('sourceEntry')
-            ? $this->getRelation('sourceEntry')
-            : $this->sourceEntry()->first();
-
-        return $source?->effectiveNoActivity([...$visited, $this->id]) ?? $this->no_activity;
+        return $this->no_activity;
     }
 }

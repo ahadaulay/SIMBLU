@@ -65,10 +65,10 @@ class ReportEditor extends Component
         $this->previousEntries = [];
         $this->sections = $report->entries->mapWithKeys(function ($entry) use ($previous, $workflow): array {
             $previousEntry = $previous['entries']->get($entry->indicator_id);
-            $isLinked = $previousEntry && $entry->source_entry_id === $previousEntry->id;
+            $isExistingCopy = $previousEntry && $entry->source_entry_id === $previousEntry->id;
 
-            // A linked entry keeps its checkbox so the user can still unlink it after the source was emptied.
-            if ($workflow->canUsePrevious($entry, $previousEntry) || $isLinked) {
+            // Keep the copy marker visible even if the original data is later emptied.
+            if ($workflow->canUsePrevious($entry, $previousEntry) || $isExistingCopy) {
                 $this->previousEntries[$entry->id] = [
                     'entry_id' => $previousEntry->id,
                     'period' => $previous['period']->label,
@@ -114,7 +114,6 @@ class ReportEditor extends Component
         $workflow->assertEditable($report);
         $entry = $report->entries()->findOrFail($entryId);
         abort_unless($entry->definition['form_type'] === 'DYNAMIC', 403);
-        abort_if($this->sections[$entryId]['use_previous'] ?? false, 403);
         if (count($this->sections[$entryId]['rows']) < 500) {
             $this->sections[$entryId]['no_activity'] = false;
             $this->sections[$entryId]['rows'][] = ['key' => (string) Str::uuid(), 'label' => '', 'values' => array_fill_keys(array_column($entry->definition['fields'], 'code'), null), 'details' => []];
@@ -126,7 +125,6 @@ class ReportEditor extends Component
         $report = UnitReport::findOrFail($this->reportId);
         $workflow->assertEditable($report);
         abort_unless($report->entries()->findOrFail($entryId)->definition['form_type'] === 'DYNAMIC', 403);
-        abort_if($this->sections[$entryId]['use_previous'] ?? false, 403);
         unset($this->sections[$entryId]['rows'][$index]);
         $this->sections[$entryId]['rows'] = array_values($this->sections[$entryId]['rows']);
     }
@@ -214,7 +212,6 @@ class ReportEditor extends Component
         $entry = $report->entries()->findOrFail($this->detailEntryId);
         abort_unless(app(IndicatorCalculator::class)->detailField($entry->definition), 404);
         abort_unless(isset($this->sections[$entry->id]['rows'][$this->detailRowIndex]), 404);
-        abort_if($this->sections[$entry->id]['use_previous'] ?? false, 403);
     }
 
     public function save(ReportWorkflow $workflow): void
@@ -396,9 +393,7 @@ class ReportEditor extends Component
             }
         }
 
-        $detailEditable = $selectedDetail
-            && $editable
-            && ! ($this->sections[$selectedDetail['entry_id']]['use_previous'] ?? false);
+        $detailEditable = $selectedDetail && $editable;
 
         return view('livewire.report-editor', ['report' => $report, 'editable' => $editable, 'detailEditable' => $detailEditable, 'histories' => $report->histories()->with('user')->latest('id')->limit(30)->get(), 'completion' => app(ReportWorkflow::class)->completion($report), 'selectedDetail' => $selectedDetail]);
     }

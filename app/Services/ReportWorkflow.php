@@ -185,7 +185,7 @@ class ReportWorkflow
 
     public function canUsePrevious(ReportEntry $entry, ?ReportEntry $previousEntry): bool
     {
-        // The definition version pins the same indicator items, so only filled previous data may be referenced.
+        // The definition version pins the same indicator items, so only compatible filled data may be copied.
         if (! $previousEntry || $previousEntry->definition['version'] !== $entry->definition['version']) {
             return false;
         }
@@ -269,15 +269,14 @@ class ReportWorkflow
 
                 if ($section['use_previous']) {
                     $sourceEntry = $previousEntries->get($entry->indicator_id);
+                    $isExistingCopy = $sourceEntry && $entry->source_entry_id === $sourceEntry->id;
 
-                    if (! $this->canUsePrevious($entry, $sourceEntry)) {
+                    if ((! $isExistingCopy && ! $this->canUsePrevious($entry, $sourceEntry))
+                        || $sourceEntry?->definition['version'] !== $entry->definition['version']) {
                         throw ValidationException::withMessages([
                             'use_previous' => 'Data indikator pada triwulan sebelumnya belum diisi, tidak tersedia, atau versinya berbeda.',
                         ]);
                     }
-
-                    $rowsToValidate = $sourceEntry->effectiveRows();
-                    $noActivity = $sourceEntry->effectiveNoActivity();
                 }
 
                 $hasValues = collect($rowsToValidate)->contains(

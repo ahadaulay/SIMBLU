@@ -188,8 +188,9 @@ class ReportingTest extends TestCase
             ->assertSee('statusnya sudah diajukan');
     }
 
-    public function test_previous_quarter_reference_stays_linked_to_source_data(): void
+    public function test_previous_quarter_data_is_copied_and_can_be_extended_without_changing_source(): void
     {
+        $this->indicator->update(['form_type' => 'DYNAMIC']);
         $cycle = ReportingCycle::create([
             'year' => 2026,
             'frequency' => 'QUARTERLY',
@@ -212,28 +213,34 @@ class ReportingTest extends TestCase
 
         // The checkbox stays hidden while the previous quarter has no data.
         Livewire::test(ReportEditor::class, ['reportId' => $secondReport->id])
-            ->assertDontSee('Sama seperti triwulan sebelumnya')
+            ->assertDontSee('Salin data dari triwulan sebelumnya')
             ->set('sections.'.$secondEntry->id.'.use_previous', true)
             ->call('save')
             ->assertHasErrors('sections.'.$secondEntry->id.'.use_previous');
 
         Livewire::test(ReportEditor::class, ['reportId' => $firstReport->id])
+            ->call('addRow', $firstEntry->id)
+            ->set('sections.'.$firstEntry->id.'.rows.0.label', 'Data lama')
             ->set('sections.'.$firstEntry->id.'.rows.0.values.amount', 10)
             ->call('save')
             ->assertHasNoErrors();
 
         Livewire::test(ReportEditor::class, ['reportId' => $secondReport->id])
-            ->assertSee('Sama seperti triwulan sebelumnya (TW 1 / 2026)')
+            ->assertSee('Salin data dari triwulan sebelumnya (TW 1 / 2026)')
             ->call('togglePrevious', $secondEntry->id, true)
             ->assertSet('sections.'.$secondEntry->id.'.rows.0.values.amount', 10)
-            ->set('sections.'.$secondEntry->id.'.rows.0.values.amount', 999)
+            ->assertSee('Silakan ubah atau tambahkan data')
+            ->call('addRow', $secondEntry->id)
+            ->set('sections.'.$secondEntry->id.'.rows.1.label', 'Tambahan baru')
+            ->set('sections.'.$secondEntry->id.'.rows.1.values.amount', 5)
             ->call('submit')
             ->assertHasNoErrors();
 
         $secondEntry->refresh();
         $this->assertSame($firstEntry->id, $secondEntry->source_entry_id);
         $this->assertEquals(10, $secondEntry->rows[0]['values']['amount']);
-        $this->assertEquals(10, $secondEntry->effectiveRows()[0]['values']['amount']);
+        $this->assertEquals(5, $secondEntry->rows[1]['values']['amount']);
+        $this->assertCount(1, $firstEntry->fresh()->rows);
 
         $this->actingAs($this->admin);
         Livewire::test(ReportEditor::class, ['reportId' => $secondReport->id])
@@ -247,7 +254,8 @@ class ReportingTest extends TestCase
             ->assertHasNoErrors();
 
         Livewire::test(ReportEditor::class, ['reportId' => $secondReport->id])
-            ->assertSet('sections.'.$secondEntry->id.'.rows.0.values.amount', 25);
+            ->assertSet('sections.'.$secondEntry->id.'.rows.0.values.amount', 10)
+            ->assertSet('sections.'.$secondEntry->id.'.rows.1.values.amount', 5);
 
         $this->actingAs($this->admin);
         $result = app(ReportRecap::class)->build([
@@ -257,7 +265,7 @@ class ReportingTest extends TestCase
             'grouping' => 'TOTAL',
         ]);
 
-        $this->assertEquals(25, $result['rows'][0]['value']);
+        $this->assertEquals(15, $result['rows'][0]['value']);
     }
 
     public function test_optional_row_details_must_match_the_main_total_on_submit(): void

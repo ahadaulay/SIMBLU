@@ -211,30 +211,55 @@
                     @if($editable)
                         @php($attachmentTypes = config('reporting.attachment_types'))
                         @php($attachmentMaxKb = config('reporting.attachment_max_kb'))
-                        <div x-data="{ uploadError: '' }">
-                            <label for="upload-{{ $entry->id }}">Bukti pendukung ({{ strtoupper(implode(', ', $attachmentTypes)) }}, maks. {{ $attachmentMaxKb / 1024 }} MB)</label>
-                            <input id="upload-{{ $entry->id }}" type="file" class="form-control mb-2"
+                        <div wire:key="attachment-picker-{{ $entry->id }}" x-data="{ files: [], uploading: false, uploadError: '' }">
+                            <label for="upload-{{ $entry->id }}">Bukti pendukung ({{ strtoupper(implode(', ', $attachmentTypes)) }}, maks. {{ $attachmentMaxKb / 1024 }} MB per file)</label>
+                            <input id="upload-{{ $entry->id }}" type="file" class="form-control mb-2" multiple
                                 accept=".{{ implode(',.', $attachmentTypes) }}"
-                                wire:model="uploads.{{ $entry->id }}"
-                                x-on:change.capture="
+                                x-bind:disabled="uploading"
+                                x-on:change="
                                     uploadError = '';
-                                    const file = $event.target.files[0];
-                                    if (file) {
+                                    for (const file of $event.target.files) {
                                         const extension = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
                                         if (!$event.target.accept.split(',').includes(extension)) {
                                             uploadError = 'Pilih file PDF, XLSX, atau DOCX.';
                                         } else if (file.size > {{ $attachmentMaxKb * 1024 }}) {
                                             uploadError = 'Ukuran lampiran maksimal {{ $attachmentMaxKb / 1024 }} MB.';
-                                        }
-                                        if (uploadError) {
-                                            $event.stopImmediatePropagation();
-                                            $event.target.value = '';
+                                        } else {
+                                            files.push(file);
                                         }
                                     }
+                                    $event.target.value = '';
                                 ">
-                            <div x-cloak x-show="uploadError" x-text="uploadError" class="text-danger" role="alert"></div>
+                            <ul style="display: none" x-show="files.length" class="list-unstyled mb-2">
+                                <template x-for="(file, index) in files" :key="index">
+                                    <li class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="text-break" x-text="file.name"></span>
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                            x-bind:aria-label="'Hapus dari pilihan: ' + file.name"
+                                            x-bind:disabled="uploading" x-on:click="files.splice(index, 1)">×</button>
+                                    </li>
+                                </template>
+                            </ul>
+                            <button type="button" class="btn btn-sm btn-primary mb-2" style="display: none" x-show="files.length"
+                                x-bind:disabled="uploading"
+                                x-on:click="
+                                    uploadError = '';
+                                    uploading = true;
+                                    const next = () => {
+                                        if (!files.length) {
+                                            uploading = false;
+                                            return;
+                                        }
+                                        $wire.upload('uploads.{{ $entry->id }}', files[0], () => {
+                                            files.shift();
+                                            queueMicrotask(next);
+                                        }, () => { uploading = false; });
+                                    };
+                                    next();
+                                ">Unggah lampiran</button>
+                            <div style="display: none" x-show="uploading" class="text-muted" role="status">Mengunggah...</div>
+                            <div x-show="uploadError" x-text="uploadError" class="text-danger" role="alert"></div>
                         </div>
-                        <div wire:loading wire:target="uploads.{{ $entry->id }},upload" class="text-muted" role="status">Mengunggah...</div>
                         @error('uploads.'.$entry->id)
                             <div class="text-danger">{{ $message }}</div>
                         @enderror

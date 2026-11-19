@@ -10,6 +10,7 @@ use App\Livewire\IndicatorTable;
 use App\Livewire\PeriodTable;
 use App\Livewire\RecapTable;
 use App\Livewire\ReportEditor;
+use App\Livewire\ReportingCycleTable;
 use App\Livewire\ReportTable;
 use App\Livewire\UnitTable;
 use App\Livewire\UserTable;
@@ -122,6 +123,13 @@ class ReportingTest extends TestCase
         return app(ReportWorkflow::class)->start($this->period->id, $this->operator);
     }
 
+    private function configureAssignedIndicator(array $attributes): void
+    {
+        $this->indicator->update($attributes);
+        $assignment = IndicatorAssignment::where('period_id', $this->period->id)->sole();
+        app(ReportWorkflow::class)->updateAssignedIndicator($this->period->id, $this->unit->id, $assignment->id);
+    }
+
     private function verified(ReportingPeriod $period, int $amount): UnitReport
     {
         $this->actingAs($this->operator);
@@ -136,7 +144,7 @@ class ReportingTest extends TestCase
 
     public function test_admin_pages_use_livewire_and_render_without_errors(): void
     {
-        foreach (['units.index' => UnitTable::class, 'users.index' => UserTable::class, 'periods.index' => PeriodTable::class, 'categories.index' => CategoryTable::class, 'indicators.index' => IndicatorTable::class, 'assignments.index' => AssignmentTable::class] as $route => $component) {
+        foreach (['units.index' => UnitTable::class, 'users.index' => UserTable::class, 'periods.index' => ReportingCycleTable::class, 'categories.index' => CategoryTable::class, 'indicators.index' => IndicatorTable::class, 'assignments.index' => AssignmentTable::class] as $route => $component) {
             $this->get(route($route))->assertOk()->assertSeeLivewire($component);
         }
         $this->get(route('dashboard'))->assertOk();
@@ -190,7 +198,7 @@ class ReportingTest extends TestCase
 
     public function test_previous_quarter_data_is_copied_and_can_be_extended_without_changing_source(): void
     {
-        $this->indicator->update(['form_type' => 'DYNAMIC']);
+        $this->configureAssignedIndicator(['form_type' => 'DYNAMIC']);
         $cycle = ReportingCycle::create([
             'year' => 2026,
             'frequency' => 'QUARTERLY',
@@ -270,7 +278,7 @@ class ReportingTest extends TestCase
 
     public function test_optional_row_details_must_match_the_main_total_on_submit(): void
     {
-        $this->indicator->update([
+        $this->configureAssignedIndicator([
             'form_type' => 'FIXED',
             'items' => [
                 ['code' => 'lokal', 'label' => 'Lokal'],
@@ -461,6 +469,7 @@ class ReportingTest extends TestCase
 
         Livewire::test(AssignmentTable::class)
             ->call('openEditModal', $assignment->id)
+            ->set('form.responsible_user_id', $this->operator->id)
             ->set('form.required', false)
             ->call('save')
             ->assertHasErrors('form.period_id');
@@ -471,6 +480,76 @@ class ReportingTest extends TestCase
             ->assertHasErrors('form.indicator_id');
 
         $this->assertModelExists($assignment);
+    }
+
+    public function test_update_refreshes_only_the_selected_indicator_and_preserves_saved_values(): void
+    {
+        $previous = ReportingPeriod::create(['year' => 2025, 'quarter' => 4, 'deadline' => '2026-01-10', 'status' => 'OPEN']);
+        $this->assign($previous);
+        $previousReport = $this->verified($previous, 10);
+        $previous->update(['status' => 'CLOSED']);
+        $other = $this->indicator->replicate();
+        $other->code = 'OTHER';
+        $other->save();
+        $assignment = IndicatorAssignment::where('period_id', $this->period->id)->sole();
+        $otherAssignment = $assignment->replicate();
+        $otherAssignment->indicator_id = $other->id;
+        $otherAssignment->definition = null;
+        $otherAssignment->save();
+
+        $report = $this->start();
+        $entry = $report->entries()->where('indicator_id', $this->indicator->id)->sole();
+        $otherEntry = $report->entries()->where('indicator_id', $other->id)->sole();
+        $rows = $entry->rows;
+        $rows[0]['values']['amount'] = 7;
+        $entry->update(['rows' => $rows]);
+        $this->indicator->update(['name' => 'Nama terbaru', 'version' => 2, 'fields' => [$this->field('amount'), $this->field('extra')]]);
+        $other->update(['name' => 'Indikator lain terbaru', 'version' => 2]);
+
+        $this->actingAs($this->admin);
+        $component = Livewire::test(AssignmentTable::class)
+            ->call('openDetail', $this->period->id, $this->unit->id)
+            ->assertSee('Update')
+            ->call('updateIndicator', $assignment->id)
+            ->assertHasNoErrors()
+            ->assertSee('Nama terbaru');
+
+        $this->assertSame(2, $assignment->fresh()->definition['version']);
+        $this->assertSame(2, $entry->fresh()->definition['version']);
+        $this->assertEquals(['amount' => 7, 'extra' => null], $entry->fresh()->rows[0]['values']);
+        $this->assertSame(1, $otherEntry->fresh()->definition['version']);
+        $this->assertSame(1, $otherAssignment->fresh()->definition['version']);
+        $this->assertSame(1, $previousReport->entries()->sole()->definition['version']);
+        $this->assertSame(2, $report->fresh()->version);
+
+        $this->indicator->update(['version' => 3, 'fields' => [$this->field('extra')], 'result_field' => 'extra']);
+        $component->call('updateIndicator', $assignment->id)->assertHasErrors('updateIndicator');
+        $this->assertSame(2, $entry->fresh()->definition['version']);
+
+        $previousAssignment = IndicatorAssignment::where('period_id', $previous->id)->sole();
+        $component->call('updateIndicator', $previousAssignment->id)->assertHasErrors('updateIndicator');
+        $report->update(['status' => 'SUBMITTED']);
+        Livewire::test(AssignmentTable::class)
+            ->call('openDetail', $this->period->id, $this->unit->id)
+            ->assertDontSee('Update')
+            ->call('updateIndicator', $assignment->id)->assertHasErrors('updateIndicator');
+        Livewire::test(AssignmentTable::class)->call('openDetail', $previous->id, $this->unit->id)
+            ->call('updateIndicator', $previousAssignment->id)->assertHasErrors('updateIndicator');
+        $this->assertSame(1, $previousAssignment->fresh()->definition['version']);
+    }
+
+    public function test_update_can_refresh_an_assignment_before_the_report_exists_and_requires_admin(): void
+    {
+        $assignment = IndicatorAssignment::where('period_id', $this->period->id)->sole();
+        $this->indicator->update(['name' => 'Nama terbaru', 'version' => 2]);
+
+        Livewire::test(AssignmentTable::class)
+            ->call('openDetail', $this->period->id, $this->unit->id)
+            ->assertSee('Mahasiswa baru')
+            ->call('updateIndicator', $assignment->id)
+            ->assertHasNoErrors();
+        $this->assertSame(2, $this->start()->entries()->sole()->definition['version']);
+        Livewire::test(AssignmentTable::class)->assertForbidden();
     }
 
     public function test_assignment_indicator_can_be_deleted_before_report_is_created(): void
@@ -539,7 +618,7 @@ class ReportingTest extends TestCase
     public function test_private_attachment_upload_and_required_evidence(): void
     {
         Storage::fake('local');
-        $this->indicator->update(['requires_attachment' => true]);
+        $this->configureAssignedIndicator(['requires_attachment' => true]);
         $report = $this->start();
         $entry = $report->entries()->first();
         Livewire::test(ReportEditor::class, ['reportId' => $report->id])->set('sections.'.$entry->id.'.rows.0.values.amount', 2)->call('submit')->assertHasErrors('sections.'.$entry->id.'.attachment')->set('uploads.'.$entry->id, UploadedFile::fake()->create('proof.pdf', 10, 'application/pdf'))->assertHasNoErrors()->call('submit')->assertHasNoErrors();
@@ -559,7 +638,7 @@ class ReportingTest extends TestCase
 
     public function test_filtered_metric_counts_people_once_across_units_and_periods(): void
     {
-        $this->indicator->update(['form_type' => 'DYNAMIC', 'aggregation' => 'DISTINCT', 'result_field' => 'student', 'fields' => [$this->field('student', 'TEXT'), array_replace($this->field('level', 'CHOICE'), ['options' => "Lokal\nNasional\nInternasional"])]]);
+        $this->configureAssignedIndicator(['form_type' => 'DYNAMIC', 'aggregation' => 'DISTINCT', 'result_field' => 'student', 'fields' => [$this->field('student', 'TEXT'), array_replace($this->field('level', 'CHOICE'), ['options' => "Lokal\nNasional\nInternasional"])]]);
         $report = $this->start();
         $entry = $report->entries()->first();
         $rows = [['key' => 'a', 'label' => 'Prestasi A', 'values' => ['student' => '123', 'level' => 'Nasional']], ['key' => 'b', 'label' => 'Prestasi B', 'values' => ['student' => '123', 'level' => 'Internasional']], ['key' => 'c', 'label' => 'Prestasi C', 'values' => ['student' => '456', 'level' => 'Lokal']]];
@@ -617,7 +696,7 @@ class ReportingTest extends TestCase
 
     public function test_dynamic_zero_activity_and_invalid_choice_are_validated(): void
     {
-        $this->indicator->update(['form_type' => 'DYNAMIC']);
+        $this->configureAssignedIndicator(['form_type' => 'DYNAMIC']);
         $report = $this->start();
         $entry = $report->entries()->first();
         Livewire::test(ReportEditor::class, ['reportId' => $report->id])->set('sections.'.$entry->id.'.no_activity', true)->call('submit')->assertHasErrors('sections.'.$entry->id.'.explanation')->set('sections.'.$entry->id.'.explanation', 'Tidak ada penerimaan pada periode ini.')->call('submit')->assertHasNoErrors();

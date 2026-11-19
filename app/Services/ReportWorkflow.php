@@ -57,7 +57,7 @@ class ReportWorkflow
         ]);
 
         foreach ($assignments as $assignment) {
-            $definition = $assignment->indicator->definition();
+            $definition = $assignment->definition ?? $assignment->indicator->definition();
             // Definisi indikator disalin agar laporan lama tidak berubah saat master diedit.
             $report->entries()->create([
                 'indicator_id' => $assignment->indicator_id,
@@ -87,6 +87,98 @@ class ReportWorkflow
             'values' => array_fill_keys(array_column($definition['fields'], 'code'), null),
             'details' => [],
         ], $items);
+    }
+
+    public function updateAssignedIndicator(int $periodId, int $unitId, int $assignmentId): void
+    {
+        Gate::authorize('reporting-admin');
+
+        DB::transaction(function () use ($periodId, $unitId, $assignmentId): void {
+            $period = ReportingPeriod::lockForUpdate()->findOrFail($periodId);
+            $assignment = IndicatorAssignment::with('indicator.category')
+                ->where('period_id', $periodId)->where('unit_id', $unitId)
+                ->lockForUpdate()->find($assignmentId);
+            if (! $assignment) {
+                throw ValidationException::withMessages([
+                    'updateIndicator' => 'Indikator tidak ditemukan pada penugasan unit dan periode ini.',
+                ]);
+            }
+
+            $report = UnitReport::where('period_id', $periodId)->where('unit_id', $unitId)->lockForUpdate()->first();
+
+            if (! in_array($period->status, ['DRAFT', 'OPEN'], true)
+                || ($report && ! in_array($report->status, ['DRAFT', 'REVISION'], true))) {
+                throw ValidationException::withMessages([
+                    'updateIndicator' => 'Indikator hanya dapat diperbarui sebelum periode ditutup, pada laporan draf atau revisi.',
+                ]);
+            }
+
+            $definition = $assignment->indicator->definition();
+            if ($report) {
+                $entry = $report->entries()->where('indicator_id', $assignment->indicator_id)->firstOrFail();
+                if ($entry->definition != $definition) {
+                    $rows = $this->rowsForUpdatedIndicator($entry, $definition);
+                    $entry->update(['definition' => $definition, 'rows' => $rows, 'source_entry_id' => null]);
+                    $report->increment('version');
+                    $this->history($report, $report->status, 'Definisi indikator '.$definition['code'].' diperbarui dari master.');
+                }
+            }
+
+            $assignment->update(['definition' => $definition]);
+        });
+    }
+
+    private function rowsForUpdatedIndicator(ReportEntry $entry, array $definition): array
+    {
+        $old = $entry->definition;
+        $rows = $entry->effectiveRows();
+        $hasData = $entry->effectiveNoActivity() || collect($rows)->contains(
+            fn (array $row) => ($row['details'] ?? []) !== []
+                || ($old['form_type'] === 'DYNAMIC' && filled($row['label'] ?? null))
+                || collect($row['values'])->contains(fn ($value) => $value !== null && $value !== '')
+        );
+
+        if (! $hasData) {
+            return $this->blankRows($definition);
+        }
+
+        $oldFields = collect($old['fields'])->keyBy('code');
+        $newFields = collect($definition['fields'])->keyBy('code');
+        $newRows = $this->blankRows($definition);
+        if ($old['form_type'] !== $definition['form_type']
+            || $oldFields->contains(fn ($field, $code) => $field['type'] !== ($newFields->get($code)['type'] ?? null))
+            || ($definition['form_type'] !== 'DYNAMIC' && array_diff(array_column($rows, 'key'), array_column($newRows, 'key')))) {
+            throw ValidationException::withMessages([
+                'updateIndicator' => 'Struktur baru tidak kompatibel dengan isian indikator yang sudah tersimpan.',
+            ]);
+        }
+
+        if ($definition['form_type'] !== 'DYNAMIC') {
+            $existing = collect($rows)->keyBy('key');
+            $rows = array_map(fn ($row) => $existing->get($row['key'], $row), $newRows);
+        }
+
+        try {
+            $normalized = $this->calculator->normalize($definition, $rows, false, $entry->effectiveNoActivity());
+        } catch (ValidationException $exception) {
+            throw ValidationException::withMessages([
+                'updateIndicator' => 'Isian indikator tidak memenuhi definisi baru. '.$exception->getMessage(),
+            ]);
+        }
+        foreach ($rows as $index => $row) {
+            foreach ($oldFields as $code => $field) {
+                $value = $row['values'][$code] ?? null;
+                $newValue = $normalized[$index]['values'][$code] ?? null;
+                if ($field['type'] !== 'CALCULATED' && $value !== null && $value !== ''
+                    && ($newValue === null || $value != $newValue)) {
+                    throw ValidationException::withMessages([
+                        'updateIndicator' => 'Definisi baru akan mengubah nilai isian yang sudah tersimpan.',
+                    ]);
+                }
+            }
+        }
+
+        return $normalized;
     }
 
     public function import(int $periodId, int $unitId, int $indicatorId, array $rows, string $source): UnitReport

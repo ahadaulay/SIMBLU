@@ -1,5 +1,5 @@
 <div @if($createOnLoad) wire:init="openContextCreateModal" @endif>
-    @if(session()->has('success'))
+    @if(! $detailMode && session()->has('success'))
         <div class="alert alert-success" role="status">{{ session('success') }}</div>
     @endif
 
@@ -65,6 +65,9 @@
                 </div>
 
                 <div class="modal-body">
+                    @if($detailMode && session()->has('success'))
+                        <div class="alert alert-success" role="status">{{ session('success') }}</div>
+                    @endif
                     @if($errors->any())
                         <div class="alert alert-danger"><ul class="mb-0">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
                     @endif
@@ -76,11 +79,24 @@
                                 <tbody>
                                     @foreach($detailAssignments as $assignment)
                                         <tr wire:key="assignment-detail-{{ $assignment->id }}">
-                                            <td>{{ $assignment->indicator->code }}</td>
-                                            <td>{{ $assignment->indicator->name }}</td>
+                                            <td>{{ $assignment->definition['code'] ?? $assignment->indicator->code }}</td>
+                                            <td>{{ $assignment->definition['name'] ?? $assignment->indicator->name }}</td>
                                             <td>{{ $assignment->responsible?->name ?? 'Belum ditentukan' }}</td>
                                             <td>{{ $assignment->required ? 'Wajib' : 'Opsional' }}</td>
                                             <td>
+                                                @if(in_array($detailPeriod?->status, ['DRAFT', 'OPEN'], true) && in_array($detailReportStatus, [null, 'DRAFT', 'REVISION'], true))
+                                                    <button
+                                                        class="btn btn-sm btn-outline-primary"
+                                                        type="button"
+                                                        wire:click="updateIndicator({{ $assignment->id }})"
+                                                        wire:confirm="Ambil definisi terbaru dari Kategori Indikator untuk indikator ini?"
+                                                        wire:loading.attr="disabled"
+                                                        wire:target="updateIndicator({{ $assignment->id }})"
+                                                    >
+                                                        <i class="ti ti-refresh me-1"></i>
+                                                        Update
+                                                    </button>
+                                                @endif
                                                 <button
                                                     class="btn btn-sm btn-outline-danger"
                                                     type="button"

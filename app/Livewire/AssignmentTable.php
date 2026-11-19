@@ -8,6 +8,7 @@ use App\Models\ReportingPeriod;
 use App\Models\Unit;
 use App\Models\UnitReport;
 use App\Models\User;
+use App\Services\ReportWorkflow;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -167,6 +168,15 @@ class AssignmentTable extends Component
         }
     }
 
+    public function updateIndicator(int $id, ReportWorkflow $workflow): void
+    {
+        abort_unless($this->detailPeriodId && $this->detailUnitId, 404);
+
+        $workflow->updateAssignedIndicator($this->detailPeriodId, $this->detailUnitId, $id);
+        $this->resetValidation();
+        session()->flash('success', 'Definisi indikator diperbarui dari Kategori Indikator.');
+    }
+
     public function openEditModal(int $id): void
     {
         $record = IndicatorAssignment::findOrFail($id);
@@ -267,6 +277,9 @@ class AssignmentTable extends Component
                 ->get(),
             'selectedPeriod' => $this->periodId ? ReportingPeriod::find($this->periodId) : null,
             'detailPeriod' => $this->detailPeriodId ? ReportingPeriod::find($this->detailPeriodId) : null,
+            'detailReportStatus' => $this->detailMode
+                ? UnitReport::where('period_id', $this->detailPeriodId)->where('unit_id', $this->detailUnitId)->value('status')
+                : null,
             'detailUnit' => $this->detailUnitId ? Unit::find($this->detailUnitId) : null,
             'detailAssignments' => $this->detailMode
                 ? IndicatorAssignment::with(['indicator', 'responsible'])

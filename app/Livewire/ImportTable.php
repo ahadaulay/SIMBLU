@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Indicator;
+use App\Models\IndicatorAssignment;
 use App\Models\ReportingPeriod;
 use App\Models\Unit;
 use App\Models\UnitReport;
@@ -65,7 +66,10 @@ class ImportTable extends Component
     {
         $entry = UnitReport::where('period_id', $this->periodId)->where('unit_id', $this->unitId)->first()?->entries()->where('indicator_id', $this->indicatorId)->first();
 
-        return $entry?->definition ?? Indicator::findOrFail($this->indicatorId)->definition();
+        return $entry?->definition
+            ?? IndicatorAssignment::where('period_id', $this->periodId)->where('unit_id', $this->unitId)
+                ->where('indicator_id', $this->indicatorId)->first()?->definition
+            ?? Indicator::findOrFail($this->indicatorId)->definition();
     }
 
     private function fingerprint(array $definition): string

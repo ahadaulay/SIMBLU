@@ -135,7 +135,7 @@ class ReportRecap
         unset($bucket);
         $assignments = IndicatorAssignment::with(['unit', 'period', 'indicator'])->whereIn('period_id', $filters['periods'])->when($unitIds, fn ($q) => $q->whereIn('unit_id', $unitIds))->when($filters['indicators'], fn ($q) => $q->whereIn('indicator_id', $filters['indicators']))->when($metrics->isNotEmpty(), fn ($q) => $q->whereIn('indicator_id', $metrics->pluck('indicator_id')))->get();
         $verifiedPairs = $reports->map(fn ($report) => $report->unit_id.':'.$report->period_id)->all();
-        $missing = $assignments->reject(fn ($assignment) => in_array($assignment->unit_id.':'.$assignment->period_id, $verifiedPairs, true))->map(fn ($a) => ['unit' => $a->unit->name, 'period' => $a->period->label, 'indicator' => $a->indicator->name])->values()->all();
+        $missing = $assignments->reject(fn ($assignment) => in_array($assignment->unit_id.':'.$assignment->period_id, $verifiedPairs, true))->map(fn ($a) => ['unit' => $a->unit->name, 'period' => $a->period->label, 'indicator' => $a->definition['name'] ?? $a->indicator->name])->values()->all();
 
         $availableUnits = Unit::query()
             ->when($unitIds, fn ($query) => $query->whereIn('id', $unitIds))

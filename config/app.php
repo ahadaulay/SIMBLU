@@ -77,6 +77,8 @@ return [
 
     'asset_url' => env('ASSET_URL', '/'),
 
+    'trusted_proxies' => env('TRUSTED_PROXIES', ''),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

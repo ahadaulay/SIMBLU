@@ -63,6 +63,7 @@ COPY --chown=www-data:www-data app ./app
 COPY --chown=www-data:www-data bootstrap ./bootstrap
 COPY --chown=www-data:www-data config ./config
 COPY --chown=www-data:www-data database ./database
+COPY --chown=www-data:www-data lang ./lang
 COPY --chown=www-data:www-data public ./public
 COPY --chown=www-data:www-data resources ./resources
 COPY --chown=www-data:www-data routes ./routes

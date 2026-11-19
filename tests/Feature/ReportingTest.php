@@ -749,6 +749,20 @@ class ReportingTest extends TestCase
             ->assertSee('Ke beranda SIBLU');
     }
 
+    public function test_livewire_signed_upload_accepts_https_from_the_configured_proxy(): void
+    {
+        Storage::fake('tmp-for-tests');
+        config(['app.trusted_proxies' => '172.18.0.1']);
+        URL::forceScheme('https');
+        $url = str_replace('https://', 'http://', URL::temporarySignedRoute('livewire.upload-file', now()->addMinute()));
+        $file = fn () => ['files' => [UploadedFile::fake()->create('proof.pdf', 10, 'application/pdf')]];
+        $headers = ['X-Forwarded-Proto' => 'https'];
+
+        $this->withServerVariables(['REMOTE_ADDR' => '172.18.0.2'])->postJson($url, $file(), $headers)->assertUnauthorized();
+        $this->withServerVariables(['REMOTE_ADDR' => '172.18.0.1'])->postJson($url, $file(), $headers)
+            ->assertOk()->assertJsonCount(1, 'paths');
+    }
+
     public function test_livewire_temporary_upload_enforces_attachment_limits(): void
     {
         Storage::fake('tmp-for-tests');

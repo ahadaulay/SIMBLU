@@ -93,11 +93,15 @@ class ReportEditor extends Component
         $entry = $report->entries()->findOrFail($entryId);
         abort_unless(isset($this->previousEntries[$entryId]), 404);
 
-        $this->sections[$entryId]['use_previous'] = $usePrevious;
-
         if ($usePrevious) {
             $source = $entry->newQuery()->findOrFail($this->previousEntries[$entryId]['entry_id']);
-            abort_unless($workflow->canUsePrevious($entry, $source), 422, 'Data triwulan sebelumnya belum diisi.');
+            if (! $workflow->canUsePrevious($entry, $source)) {
+                $this->showValidationErrors(ValidationException::withMessages([
+                    'sections.'.$entryId.'.use_previous' => 'Data triwulan sebelumnya untuk indikator '.$entry->definition['name'].' belum tersedia atau formatnya sudah berubah. Isi indikator ini secara manual.',
+                ]));
+
+                return;
+            }
             $this->sections[$entryId]['rows'] = $source->effectiveRows();
             $this->sections[$entryId]['no_activity'] = $source->effectiveNoActivity();
         } else {
@@ -105,6 +109,7 @@ class ReportEditor extends Component
             $this->sections[$entryId]['no_activity'] = $entry->no_activity;
         }
 
+        $this->sections[$entryId]['use_previous'] = $usePrevious;
         $this->resetValidation('sections.'.$entryId);
     }
 
@@ -326,6 +331,7 @@ class ReportEditor extends Component
                 'uploads.'.$entryId.'.mimes' => 'Lampiran harus berupa file PDF, XLSX, atau DOCX.',
                 'uploads.'.$entryId.'.extensions' => 'Lampiran harus memakai ekstensi PDF, XLSX, atau DOCX.',
                 'uploads.'.$entryId.'.max' => 'Ukuran lampiran maksimal '.($maxKb / 1024).' MB.',
+                'uploads.'.$entryId.'.required' => 'Pilih lampiran bukti sebelum mengunggah.',
             ],
             ['uploads.'.$entryId => 'lampiran bukti'],
         );

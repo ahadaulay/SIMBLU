@@ -726,6 +726,29 @@ class ReportingTest extends TestCase
         $calculator->validateDefinition($fields, [], 'SINGLE', 'result', 'SUM', null);
     }
 
+    public function test_admin_form_errors_use_visible_field_names(): void
+    {
+        Livewire::test(IndicatorTable::class)
+            ->call('save')
+            ->assertHasErrors(['form.category_id' => 'required'])
+            ->assertSee('kategori indikator wajib diisi.')
+            ->assertDontSee('form.category_id wajib diisi.');
+
+        Livewire::test(ImportTable::class)
+            ->call('preview')
+            ->assertHasErrors(['file' => 'required'])
+            ->assertSee('Pilih berkas Excel untuk diimpor.')
+            ->assertSee('lembar Excel wajib diisi.');
+    }
+
+    public function test_missing_pages_explain_what_to_do(): void
+    {
+        $this->get('/halaman-siblu-tidak-ada')
+            ->assertNotFound()
+            ->assertSee('Halaman atau data tidak ditemukan.')
+            ->assertSee('Ke beranda SIBLU');
+    }
+
     public function test_livewire_temporary_upload_enforces_attachment_limits(): void
     {
         Storage::fake('tmp-for-tests');
@@ -733,7 +756,8 @@ class ReportingTest extends TestCase
         $this->postJson($url, ['files' => [UploadedFile::fake()->create('proof.pdf', 20480, 'application/pdf')]])
             ->assertOk()->assertJsonCount(1, 'paths');
         $this->postJson($url, ['files' => [UploadedFile::fake()->create('proof.pdf', 20481, 'application/pdf')]])
-            ->assertUnprocessable()->assertJsonValidationErrors('files.0');
+            ->assertUnprocessable()->assertJsonValidationErrors('files.0')
+            ->assertJsonFragment(['files.0' => ['Ukuran berkas maksimal 20 MB.']]);
         $this->postJson($url, ['files' => [UploadedFile::fake()->image('proof.jpg')]])
             ->assertUnprocessable()->assertJsonValidationErrors('files.0');
         $this->postJson($url, ['files' => [

@@ -4,10 +4,16 @@ namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Psr\Log\LogLevel;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 
 class Handler extends ExceptionHandler
 {
+    protected function getHttpExceptionView(HttpExceptionInterface $e)
+    {
+        return 'errors.request';
+    }
+
     /**
      * A list of exception types with their corresponding custom log levels.
      *

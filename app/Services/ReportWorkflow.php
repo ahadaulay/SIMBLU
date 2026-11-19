@@ -47,7 +47,7 @@ class ReportWorkflow
 
         if ($assignments->isEmpty()) {
             throw ValidationException::withMessages([
-                'periodId' => 'Belum ada indikator yang ditugaskan untuk unit ini.',
+                'periodId' => 'Unit ini belum memiliki indikator pada periode yang dipilih. Hubungi admin SIBLU untuk mengatur penugasan.',
             ]);
         }
 

@@ -73,6 +73,22 @@
 
         document.addEventListener('livewire:init', () => {
             Livewire.hook('morph.updated', () => refreshSearches());
+            const messages = {{ Illuminate\Support\Js::from(__('http.messages')) }};
+            const alert = document.getElementById('livewire-request-error');
+
+            Livewire.hook('request', ({ fail }) => {
+                fail(({ status, content, preventDefault }) => {
+                    if (!alert) {
+                        return;
+                    }
+
+                    preventDefault();
+                    alert.querySelector('[data-request-error-message]').textContent =
+                        content === null ? messages[0] : (messages[status] ?? messages[status >= 500 ? 'server' : 'client']);
+                    alert.hidden = false;
+                    alert.focus();
+                });
+            });
         });
 
         refreshSearches();

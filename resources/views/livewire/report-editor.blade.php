@@ -46,7 +46,14 @@
         <button class="btn btn-outline-secondary align-self-start" wire:click="reload" wire:confirm="Muat ulang dan lepaskan isian yang belum disimpan?">Muat ulang</button>
     </div>
     @if($report->period->deadline->endOfDay()->isPast() && $report->status !== 'VERIFIED')
-        <div class="alert alert-warning">Batas pengisian {{ $report->period->deadline->format('d/m/Y') }} telah lewat. Pengisian hanya tersedia selama periode dibuka.</div>
+        <div class="alert alert-warning" role="alert">
+            Batas pengisian {{ $report->period->deadline->format('d/m/Y') }} telah lewat.
+            @if($report->period->status === 'OPEN')
+                Periode masih dibuka.
+            @else
+                Hubungi admin SIBLU jika laporan masih perlu diisi.
+            @endif
+        </div>
     @endif
     @if(session()->has('success'))
         <div class="alert alert-success" role="status">{{ session('success') }}</div>

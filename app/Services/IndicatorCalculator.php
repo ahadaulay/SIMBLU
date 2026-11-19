@@ -32,7 +32,7 @@ class IndicatorCalculator
             if ($field['type'] === 'CALCULATED') {
                 $operands = $this->operands($field);
                 if (count($operands) < 2 || array_diff($operands, $known)) {
-                    throw ValidationException::withMessages(['fields.'.$index.'.operands' => 'Gunakan minimal dua kode field angka sebelumnya.']);
+                    throw ValidationException::withMessages(['fields.'.$index.'.operands' => 'Masukkan minimal dua kode kolom angka yang berada sebelum kolom hitung ini.']);
                 }
                 if (in_array($field['operation'], ['RATIO', 'PERCENT', 'DIFFERENCE']) && count($operands) !== 2) {
                     throw ValidationException::withMessages(['fields.'.$index.'.operands' => 'Operasi ini memerlukan tepat dua field.']);
@@ -49,10 +49,10 @@ class IndicatorCalculator
             }
         }
         if (! in_array($result, array_column($fields, 'code'), true) || (! in_array($aggregation, ['DETAIL', 'DISTINCT']) && ! in_array($result, $known, true))) {
-            throw ValidationException::withMessages(['result_field' => 'Pilih field hasil yang sesuai metode rekap.']);
+            throw ValidationException::withMessages(['result_field' => 'Pilih kolom hasil yang sesuai dengan metode rekap.']);
         }
         if ($aggregation === 'RATIO' && ! in_array($denominator, $known, true)) {
-            throw ValidationException::withMessages(['denominator_field' => 'Pilih field angka sebagai penyebut.']);
+            throw ValidationException::withMessages(['denominator_field' => 'Pilih kolom angka sebagai penyebut.']);
         }
         if ($type === 'FIXED' && $items === []) {
             throw ValidationException::withMessages(['items' => 'Tabel tetap memerlukan minimal satu butir.']);
@@ -127,7 +127,9 @@ class IndicatorCalculator
             'rows.*.details' => ['sometimes', 'array', 'max:500'],
             'rows.*.details.*.name' => [$complete ? 'required' : 'nullable', 'string', 'max:255'],
             'rows.*.details.*.amount' => [$complete ? 'required' : 'nullable', 'numeric', 'between:0,999999999999'],
-        ], [], [
+        ], [
+            'rows.min' => 'Tambahkan minimal satu baris isian. Jika tidak ada kegiatan dan pilihan itu tersedia, tandai Tidak Ada Kegiatan.',
+        ], [
             'rows' => 'daftar butir',
             'rows.*.key' => 'kode baris',
             'rows.*.label' => 'uraian',

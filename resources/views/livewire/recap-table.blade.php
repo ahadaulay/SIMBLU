@@ -172,7 +172,7 @@
             <ul class="mb-0">
                 @forelse($exports as $export)
                     <li>
-                        #{{ $export->id }} — {{ ['PENDING' => 'Menunggu worker', 'PROCESSING' => 'Diproses', 'READY' => 'Siap diunduh', 'FAILED' => 'Gagal, periksa cakupan dan coba lagi'][$export->status] }}
+                        #{{ $export->id }} — {{ ['PENDING' => 'Menunggu giliran', 'PROCESSING' => 'Sedang membuat file', 'READY' => 'Siap diunduh', 'FAILED' => 'File rekap gagal dibuat. Coba buat ulang. Jika tetap gagal, sampaikan nomor ekspor ini ke admin SIBLU.'][$export->status] }}
                         @if($export->status === 'READY')
                             <a href="{{ route('recaps.download', $export) }}">Unduh Excel</a>
                         @endif

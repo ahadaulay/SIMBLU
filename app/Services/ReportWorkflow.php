@@ -90,11 +90,11 @@ class ReportWorkflow
         ], $items);
     }
 
-    public function updateAssignedIndicator(int $periodId, int $unitId, int $assignmentId): void
+    public function updateAssignedIndicator(int $periodId, int $unitId, int $assignmentId, ?string $confirmation = null): ?array
     {
         Gate::authorize('reporting-admin');
 
-        DB::transaction(function () use ($periodId, $unitId, $assignmentId): void {
+        return DB::transaction(function () use ($periodId, $unitId, $assignmentId, $confirmation): ?array {
             $period = ReportingPeriod::lockForUpdate()->findOrFail($periodId);
             $assignment = IndicatorAssignment::with('indicator.category')
                 ->where('period_id', $periodId)->where('unit_id', $unitId)
@@ -117,16 +117,40 @@ class ReportWorkflow
             $definition = $assignment->indicator->definition();
             if ($report) {
                 $entry = $report->entries()->where('indicator_id', $assignment->indicator_id)->firstOrFail();
+                $fingerprint = hash('sha256', serialize([$entry->id, $report->version, $definition]));
+                if ($confirmation !== null && ! hash_equals($fingerprint, $confirmation)) {
+                    throw ValidationException::withMessages([
+                        'updateIndicator' => 'Laporan atau definisi berubah. Klik Update lagi untuk memeriksa perubahan terbaru.',
+                    ]);
+                }
                 if ($entry->definition != $definition) {
-                    $rows = $this->rowsForUpdatedIndicator($entry, $definition);
+                    $overwrite = false;
+                    try {
+                        $rows = $this->rowsForUpdatedIndicator($entry, $definition);
+                    } catch (ValidationException $exception) {
+                        if ($confirmation === null) {
+                            return ['confirmation' => $fingerprint, 'message' => $exception->getMessage()];
+                        }
+
+                        $this->history($report, $report->status, 'Salinan laporan sebelum isian indikator '.$entry->definition['code'].' ditimpa.');
+                        $rows = $this->blankRows($definition);
+                        $overwrite = true;
+                    }
                     $changes = $this->indicatorChanges($entry->definition, $definition);
-                    $entry->update(['definition' => $definition, 'rows' => $rows, 'source_entry_id' => null]);
+                    $entry->update([
+                        'definition' => $definition,
+                        'rows' => $rows,
+                        'source_entry_id' => null,
+                        'no_activity' => ! $overwrite && $entry->effectiveNoActivity(),
+                    ]);
                     $report->increment('version');
                     $this->history($report, $report->status, 'Definisi indikator '.$definition['code'].' diperbarui dari master. '.$changes);
                 }
             }
 
             $assignment->update(['definition' => $definition]);
+
+            return null;
         });
     }
 
@@ -144,7 +168,8 @@ class ReportWorkflow
             return $this->blankRows($definition);
         }
 
-        if ($old['form_type'] !== $definition['form_type']) {
+        $expandingSingle = $old['form_type'] === 'SINGLE' && $definition['form_type'] === 'FIXED';
+        if ($old['form_type'] !== $definition['form_type'] && ! $expandingSingle) {
             throw ValidationException::withMessages([
                 'updateIndicator' => 'Struktur baru tidak kompatibel dengan isian indikator yang sudah tersimpan.',
             ]);
@@ -153,6 +178,17 @@ class ReportWorkflow
         if ($definition['form_type'] === 'FIXED') {
             $oldItems = collect($old['items'])->keyBy(Indicator::partIdentity(...));
             $existing = collect($rows)->keyBy('key');
+            if ($expandingSingle) {
+                $items = collect($definition['items']);
+                $matches = $items->whereStrict('label', $old['name']);
+                $target = $items->firstWhere('code', 'single') ?? ($matches->count() === 1 ? $matches->first() : null);
+                if (! $target) {
+                    throw ValidationException::withMessages([
+                        'updateIndicator' => 'Untuk membawa isian dari Satu Baris ke Tabel Tetap, gunakan kode single pada butir yang akan menerima isian lama.',
+                    ]);
+                }
+                $oldItems = collect([Indicator::partIdentity($target) => ['code' => 'single']]);
+            }
             $rows = array_map(function (array $row, array $item) use ($oldItems, $existing): array {
                 $oldItem = $oldItems->get(Indicator::partIdentity($item));
                 $saved = $oldItem ? $existing->get($oldItem['code']) : null;

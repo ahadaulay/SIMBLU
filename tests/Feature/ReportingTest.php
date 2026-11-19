@@ -553,6 +553,63 @@ class ReportingTest extends TestCase
         Livewire::test(AssignmentTable::class)->assertForbidden();
     }
 
+    public function test_update_expands_a_filled_single_row_into_a_fixed_table(): void
+    {
+        $report = $this->start();
+        $entry = $report->entries()->sole();
+        $rows = $entry->rows;
+        $rows[0]['values']['amount'] = 7;
+        $entry->update(['rows' => $rows]);
+        $items = [['code' => 'extra', 'label' => 'Butir baru']];
+        $this->indicator->update(['form_type' => 'FIXED', 'version' => 2, 'items' => $items]);
+        $assignment = IndicatorAssignment::where('period_id', $this->period->id)->sole();
+
+        $this->actingAs($this->admin);
+        $component = Livewire::test(AssignmentTable::class)->call('openDetail', $this->period->id, $this->unit->id);
+        $component->call('updateIndicator', $assignment->id)->assertHasErrors('updateIndicator');
+        $this->assertSame('SINGLE', $entry->fresh()->definition['form_type']);
+
+        $items[] = ['code' => 'single', 'label' => 'Butir lama'];
+        $this->indicator->update(['items' => $items]);
+        $component->call('updateIndicator', $assignment->id)->assertHasNoErrors();
+        $rows = $entry->fresh()->rows;
+        $this->assertSame(['extra', 'single'], array_column($rows, 'key'));
+        $this->assertNull($rows[0]['values']['amount']);
+        $this->assertEquals(7, $rows[1]['values']['amount']);
+    }
+
+    public function test_update_requires_confirmation_before_overwriting_incompatible_data(): void
+    {
+        $report = $this->start();
+        $entry = $report->entries()->sole();
+        $rows = $entry->rows;
+        $rows[0]['values']['amount'] = 7;
+        $entry->update(['rows' => $rows]);
+        $this->indicator->update(['form_type' => 'DYNAMIC', 'version' => 2]);
+        $assignment = IndicatorAssignment::where('period_id', $this->period->id)->sole();
+
+        $this->actingAs($this->admin);
+        $component = Livewire::test(AssignmentTable::class)
+            ->call('openDetail', $this->period->id, $this->unit->id)
+            ->call('updateIndicator', $assignment->id)
+            ->assertSee('Data tidak sesuai');
+        $this->assertEquals(7, $entry->fresh()->rows[0]['values']['amount']);
+        $component->call('cancelIndicatorOverwrite')->assertDontSee('Data tidak sesuai');
+        $this->assertSame(1, $assignment->fresh()->definition['version']);
+
+        $component->call('updateIndicator', $assignment->id);
+        $report->increment('version');
+        $component->call('confirmIndicatorOverwrite')->assertHasErrors('updateIndicator');
+        $this->assertEquals(7, $entry->fresh()->rows[0]['values']['amount']);
+
+        $component->call('updateIndicator', $assignment->id)
+            ->call('confirmIndicatorOverwrite')->assertHasNoErrors();
+        $this->assertSame([], $entry->fresh()->rows);
+        $this->assertSame('DYNAMIC', $assignment->fresh()->definition['form_type']);
+        $backup = $report->histories()->where('note', 'like', 'Salinan laporan sebelum%')->sole();
+        $this->assertEquals(7, $backup->snapshot['entries'][0]['rows'][0]['values']['amount']);
+    }
+
     public function test_update_tracks_fixed_rows_across_renames_and_reused_codes(): void
     {
         $this->configureAssignedIndicator([

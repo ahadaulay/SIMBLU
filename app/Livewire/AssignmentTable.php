@@ -50,6 +50,9 @@ class AssignmentTable extends Component
 
     public bool $detailMode = false;
 
+    #[Locked]
+    public ?array $pendingIndicatorUpdate = null;
+
     public function mount(): void
     {
         $periodId = request()->integer('period');
@@ -69,7 +72,7 @@ class AssignmentTable extends Component
 
     public function openCreateModal(): void
     {
-        $this->reset(['form', 'editingId', 'detailPeriodId', 'detailUnitId', 'detailMode']);
+        $this->reset(['form', 'editingId', 'detailPeriodId', 'detailUnitId', 'detailMode', 'pendingIndicatorUpdate']);
         $this->form['period_id'] = $this->periodId;
         $this->resetValidation();
         $this->dispatch('open-assignment-modal');
@@ -94,7 +97,7 @@ class AssignmentTable extends Component
             ->where('unit_id', $unitId)
             ->firstOrFail();
 
-        $this->reset(['form', 'editingId']);
+        $this->reset(['form', 'editingId', 'pendingIndicatorUpdate']);
         $this->resetValidation();
         $this->detailPeriodId = $periodId;
         $this->detailUnitId = $unitId;
@@ -170,11 +173,33 @@ class AssignmentTable extends Component
 
     public function updateIndicator(int $id, ReportWorkflow $workflow): void
     {
+        $this->cancelIndicatorOverwrite();
         abort_unless($this->detailPeriodId && $this->detailUnitId, 404);
 
-        $workflow->updateAssignedIndicator($this->detailPeriodId, $this->detailUnitId, $id);
-        $this->resetValidation();
+        $pending = $workflow->updateAssignedIndicator($this->detailPeriodId, $this->detailUnitId, $id);
+        if ($pending !== null) {
+            $this->pendingIndicatorUpdate = $pending + ['id' => $id];
+            $this->addError('updateIndicator', $pending['message']);
+
+            return;
+        }
+
         session()->flash('success', 'Definisi indikator diperbarui dari Kategori Indikator.');
+    }
+
+    public function confirmIndicatorOverwrite(ReportWorkflow $workflow): void
+    {
+        $pending = $this->pendingIndicatorUpdate;
+        abort_unless($pending && $this->detailPeriodId && $this->detailUnitId, 404);
+        $this->cancelIndicatorOverwrite();
+        $workflow->updateAssignedIndicator($this->detailPeriodId, $this->detailUnitId, $pending['id'], $pending['confirmation']);
+        session()->flash('success', 'Definisi indikator diperbarui dan isian barisnya ditimpa.');
+    }
+
+    public function cancelIndicatorOverwrite(): void
+    {
+        $this->reset('pendingIndicatorUpdate');
+        $this->resetValidation('updateIndicator');
     }
 
     public function openEditModal(int $id): void

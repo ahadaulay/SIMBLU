@@ -97,6 +97,17 @@
                                                         Update
                                                     </button>
                                                 @endif
+                                                @if(($pendingIndicatorUpdate['id'] ?? null) === $assignment->id)
+                                                    <div class="alert alert-warning mt-2 mb-2" role="alert">
+                                                        <p class="mb-2">Data tidak sesuai. Lanjutkan dengan mengosongkan isian baris indikator ini?</p>
+                                                        <button class="btn btn-sm btn-warning" type="button" wire:click="confirmIndicatorOverwrite" wire:loading.attr="disabled">
+                                                            Lanjutkan &amp; Timpa
+                                                        </button>
+                                                        <button class="btn btn-sm btn-light" type="button" wire:click="cancelIndicatorOverwrite" wire:loading.attr="disabled">
+                                                            Batal
+                                                        </button>
+                                                    </div>
+                                                @endif
                                                 <button
                                                     class="btn btn-sm btn-outline-danger"
                                                     type="button"

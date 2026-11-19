@@ -189,7 +189,7 @@
                                     <h6>Kolom formulir</h6>
                                     <p class="text-muted">Kode field menggunakan huruf kecil dan garis bawah. Rumus hanya mengacu pada field angka sebelumnya.</p>
                                     @foreach($fields as $index=>$field)
-                                        <div class="border rounded p-3 mb-3" wire:key="field-{{ $index }}">
+                                        <div class="border rounded p-3 mb-3" wire:key="field-{{ $fieldIdentities[$index] ?? 'initial-'.$index }}">
                                             <div class="row g-2">
                                                 <div class="col-md-4">
                                                     <label for="f-code-{{ $index }}">Kode</label>
@@ -261,7 +261,7 @@
                                         @if($form['form_type'] === 'FIXED')
                                             <h6>Butir / baris tetap</h6>
                                             @foreach($items as $index=>$item)
-                                                <div class="row g-2 mb-2" wire:key="item-{{ $index }}">
+                                                <div class="row g-2 mb-2" wire:key="item-{{ $itemIdentities[$index] ?? 'initial-'.$index }}">
                                                     <div class="col-md-4">
                                                         <label for="item-code-{{ $index }}">Kode butir</label>
                                                         <input id="item-code-{{ $index }}" class="form-control" wire:model="items.{{ $index }}.code">

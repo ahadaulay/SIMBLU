@@ -377,7 +377,7 @@
                                 <td>{{ $history->created_at->format('d/m/Y H:i') }}</td>
                                 <td>{{ $history->user->name }}</td>
                                 <td>{{ config('reporting.statuses')[$history->to_status] }}</td>
-                                <td>{{ $history->note }}</td>
+                                <td style="white-space: pre-line">{{ $history->note }}</td>
                                 <td>
                                     <a href="{{ route('reports.history',$history) }}">Versi {{ $history->snapshot['version'] }}</a>
                                 </td>

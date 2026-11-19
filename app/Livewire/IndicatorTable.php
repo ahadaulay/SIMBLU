@@ -7,6 +7,7 @@ use App\Models\IndicatorCategory;
 use App\Services\IndicatorCalculator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -37,6 +38,12 @@ class IndicatorTable extends Component
     public array $fields = [['code' => 'amount', 'label' => 'Jumlah', 'type' => 'NUMBER', 'unit' => '', 'required' => true, 'decimals' => 0, 'min' => 0, 'max' => '', 'options' => '', 'operation' => 'SUM', 'operands' => '']];
 
     public array $items = [];
+
+    #[Locked]
+    public array $fieldIdentities = [null];
+
+    #[Locked]
+    public array $itemIdentities = [];
 
     #[Locked]
     public ?int $categoryId = null;
@@ -73,7 +80,7 @@ class IndicatorTable extends Component
 
     public function resetForm(): void
     {
-        $this->reset(['editingId', 'editingVersion', 'form', 'fields', 'items']);
+        $this->reset(['editingId', 'editingVersion', 'form', 'fields', 'items', 'fieldIdentities', 'itemIdentities']);
         $this->resetValidation();
     }
 
@@ -98,6 +105,8 @@ class IndicatorTable extends Component
         $this->form = $indicator->only(array_keys($this->form));
         $this->fields = $indicator->fields;
         $this->items = $indicator->items;
+        $this->fieldIdentities = array_map(Indicator::partIdentity(...), $this->fields);
+        $this->itemIdentities = array_map(Indicator::partIdentity(...), $this->items);
         $this->resetValidation();
         $this->dispatch('open-indicator-modal');
     }
@@ -106,26 +115,30 @@ class IndicatorTable extends Component
     {
         if (count($this->fields) < 30) {
             $this->fields[] = ['code' => '', 'label' => '', 'type' => 'NUMBER', 'unit' => '', 'required' => true, 'decimals' => 0, 'min' => '', 'max' => '', 'options' => '', 'operation' => 'SUM', 'operands' => ''];
+            $this->fieldIdentities[array_key_last($this->fields)] = (string) Str::uuid();
         }
     }
 
     public function removeField(int $index): void
     {
-        unset($this->fields[$index]);
+        unset($this->fields[$index], $this->fieldIdentities[$index]);
         $this->fields = array_values($this->fields);
+        $this->fieldIdentities = array_values($this->fieldIdentities);
     }
 
     public function addItem(): void
     {
         if (count($this->items) < 300) {
             $this->items[] = ['code' => '', 'label' => ''];
+            $this->itemIdentities[array_key_last($this->items)] = (string) Str::uuid();
         }
     }
 
     public function removeItem(int $index): void
     {
-        unset($this->items[$index]);
+        unset($this->items[$index], $this->itemIdentities[$index]);
         $this->items = array_values($this->items);
+        $this->itemIdentities = array_values($this->itemIdentities);
     }
 
     public function save(IndicatorCalculator $calculator): void
@@ -150,7 +163,10 @@ class IndicatorTable extends Component
             if ($indicator->exists && $indicator->version !== $this->editingVersion) {
                 throw ValidationException::withMessages(['form.name' => 'Formulir diubah admin lain. Muat ulang sebelum menyimpan.']);
             }
-            $indicator->fill($data + ['fields' => $this->fields, 'items' => $this->items]);
+            $indicator->fill($data + [
+                'fields' => $this->identifyParts($this->fields, $this->fieldIdentities),
+                'items' => $this->identifyParts($this->items, $this->itemIdentities),
+            ]);
             $indicator->version = $indicator->exists ? $indicator->version + 1 : 1;
             $indicator->created_by ??= auth()->id();
             $indicator->save();
@@ -158,6 +174,15 @@ class IndicatorTable extends Component
         $this->dispatch('close-indicator-modal');
         $this->resetForm();
         session()->flash('success', 'Indikator disimpan. Laporan yang sudah dibuat tetap memakai versi sebelumnya.');
+    }
+
+    private function identifyParts(array $parts, array $identities): array
+    {
+        foreach ($parts as $index => &$part) {
+            $part['identity'] = $identities[$index] ?? (string) Str::uuid();
+        }
+
+        return $parts;
     }
 
     public function render(): View

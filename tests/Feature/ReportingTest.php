@@ -523,8 +523,9 @@ class ReportingTest extends TestCase
         $this->assertSame(2, $report->fresh()->version);
 
         $this->indicator->update(['version' => 3, 'fields' => [$this->field('extra')], 'result_field' => 'extra']);
-        $component->call('updateIndicator', $assignment->id)->assertHasErrors('updateIndicator');
-        $this->assertSame(2, $entry->fresh()->definition['version']);
+        $component->call('updateIndicator', $assignment->id)->assertHasNoErrors();
+        $this->assertSame(3, $entry->fresh()->definition['version']);
+        $this->assertSame(['extra' => null], $entry->fresh()->rows[0]['values']);
 
         $previousAssignment = IndicatorAssignment::where('period_id', $previous->id)->sole();
         $component->call('updateIndicator', $previousAssignment->id)->assertHasErrors('updateIndicator');
@@ -550,6 +551,58 @@ class ReportingTest extends TestCase
             ->assertHasNoErrors();
         $this->assertSame(2, $this->start()->entries()->sole()->definition['version']);
         Livewire::test(AssignmentTable::class)->assertForbidden();
+    }
+
+    public function test_update_tracks_fixed_rows_across_renames_and_reused_codes(): void
+    {
+        $this->configureAssignedIndicator([
+            'form_type' => 'FIXED',
+            'items' => [
+                ['code' => 'keep', 'label' => 'Butir lama'],
+                ['code' => 'reuse', 'label' => 'Butir yang diganti'],
+                ['code' => 'remove', 'label' => 'Butir yang dihapus'],
+                ['code' => 'same', 'label' => 'Label lama'],
+            ],
+        ]);
+        $report = $this->start();
+        $entry = $report->entries()->sole();
+        $rows = $entry->rows;
+        $rows[0]['values']['amount'] = 12;
+        $rows[1]['values']['amount'] = 34;
+        $rows[2]['values']['amount'] = 56;
+        $rows[3]['values']['amount'] = 78;
+        $entry->update(['rows' => $rows]);
+
+        $this->actingAs($this->admin);
+        Livewire::test(IndicatorTable::class)
+            ->call('openEditModal', $this->indicator->id)
+            ->set('items.0.code', 'renamed')
+            ->set('items.0.label', 'Butir diperbarui')
+            ->set('items.3.label', 'Label baru')
+            ->call('removeItem', 2)
+            ->call('removeItem', 1)
+            ->call('addItem')
+            ->set('items.2.code', 'reuse')
+            ->set('items.2.label', 'Butir baru')
+            ->call('save')->assertHasNoErrors();
+
+        $assignment = IndicatorAssignment::where('period_id', $this->period->id)->sole();
+        Livewire::test(AssignmentTable::class)
+            ->call('openDetail', $this->period->id, $this->unit->id)
+            ->call('updateIndicator', $assignment->id)->assertHasNoErrors();
+
+        $rows = $entry->fresh()->rows;
+        $this->assertSame(['renamed', 'same', 'reuse'], array_column($rows, 'key'));
+        $this->assertSame(['Butir diperbarui', 'Label baru', 'Butir baru'], array_column($rows, 'label'));
+        $this->assertEquals(12, $rows[0]['values']['amount']);
+        $this->assertEquals(78, $rows[1]['values']['amount']);
+        $this->assertNull($rows[2]['values']['amount']);
+        $note = $report->histories()->latest('id')->firstOrFail()->note;
+        $this->assertStringContainsString('Baris diubah: keep → renamed', $note);
+        $this->assertStringContainsString('Baris diubah: same', $note);
+        $this->assertStringContainsString('Baris dihapus: remove', $note);
+        $this->assertStringContainsString('Baris dihapus: reuse', $note);
+        $this->assertStringContainsString('Baris ditambah: reuse', $note);
     }
 
     public function test_assignment_indicator_can_be_deleted_before_report_is_created(): void

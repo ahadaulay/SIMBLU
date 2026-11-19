@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Indicator;
 use App\Models\IndicatorAssignment;
 use App\Models\ReportEntry;
 use App\Models\ReportingPeriod;
@@ -118,9 +119,10 @@ class ReportWorkflow
                 $entry = $report->entries()->where('indicator_id', $assignment->indicator_id)->firstOrFail();
                 if ($entry->definition != $definition) {
                     $rows = $this->rowsForUpdatedIndicator($entry, $definition);
+                    $changes = $this->indicatorChanges($entry->definition, $definition);
                     $entry->update(['definition' => $definition, 'rows' => $rows, 'source_entry_id' => null]);
                     $report->increment('version');
-                    $this->history($report, $report->status, 'Definisi indikator '.$definition['code'].' diperbarui dari master.');
+                    $this->history($report, $report->status, 'Definisi indikator '.$definition['code'].' diperbarui dari master. '.$changes);
                 }
             }
 
@@ -142,21 +144,39 @@ class ReportWorkflow
             return $this->blankRows($definition);
         }
 
-        $oldFields = collect($old['fields'])->keyBy('code');
-        $newFields = collect($definition['fields'])->keyBy('code');
-        $newRows = $this->blankRows($definition);
-        if ($old['form_type'] !== $definition['form_type']
-            || $oldFields->contains(fn ($field, $code) => $field['type'] !== ($newFields->get($code)['type'] ?? null))
-            || ($definition['form_type'] !== 'DYNAMIC' && array_diff(array_column($rows, 'key'), array_column($newRows, 'key')))) {
+        if ($old['form_type'] !== $definition['form_type']) {
             throw ValidationException::withMessages([
                 'updateIndicator' => 'Struktur baru tidak kompatibel dengan isian indikator yang sudah tersimpan.',
             ]);
         }
 
-        if ($definition['form_type'] !== 'DYNAMIC') {
+        if ($definition['form_type'] === 'FIXED') {
+            $oldItems = collect($old['items'])->keyBy(Indicator::partIdentity(...));
             $existing = collect($rows)->keyBy('key');
-            $rows = array_map(fn ($row) => $existing->get($row['key'], $row), $newRows);
+            $rows = array_map(function (array $row, array $item) use ($oldItems, $existing): array {
+                $oldItem = $oldItems->get(Indicator::partIdentity($item));
+                $saved = $oldItem ? $existing->get($oldItem['code']) : null;
+
+                return $saved ? array_replace($saved, ['key' => $row['key'], 'label' => $row['label']]) : $row;
+            }, $this->blankRows($definition), $definition['items']);
         }
+
+        $oldFields = collect($old['fields'])->keyBy(Indicator::partIdentity(...));
+        foreach ($rows as &$row) {
+            $values = [];
+            foreach ($definition['fields'] as $field) {
+                $previous = $oldFields->get(Indicator::partIdentity($field));
+                $value = $previous ? ($row['values'][$previous['code']] ?? null) : null;
+                if ($value !== null && $value !== '' && $previous['type'] !== $field['type']) {
+                    throw ValidationException::withMessages([
+                        'updateIndicator' => 'Tipe kolom '.$field['code'].' berubah dan kolom sudah berisi data. Buat kolom baru jika isinya harus diganti.',
+                    ]);
+                }
+                $values[$field['code']] = $value;
+            }
+            $row['values'] = $values;
+        }
+        unset($row);
 
         try {
             $normalized = $this->calculator->normalize($definition, $rows, false, $entry->effectiveNoActivity());
@@ -166,7 +186,8 @@ class ReportWorkflow
             ]);
         }
         foreach ($rows as $index => $row) {
-            foreach ($oldFields as $code => $field) {
+            foreach ($definition['fields'] as $field) {
+                $code = $field['code'];
                 $value = $row['values'][$code] ?? null;
                 $newValue = $normalized[$index]['values'][$code] ?? null;
                 if ($field['type'] !== 'CALCULATED' && $value !== null && $value !== ''
@@ -179,6 +200,32 @@ class ReportWorkflow
         }
 
         return $normalized;
+    }
+
+    private function indicatorChanges(array $old, array $definition): string
+    {
+        $changes = [];
+        foreach (['items' => 'Baris', 'fields' => 'Kolom'] as $key => $label) {
+            $before = collect($old[$key])->keyBy(Indicator::partIdentity(...));
+            $after = collect($definition[$key])->keyBy(Indicator::partIdentity(...));
+
+            foreach ($before as $identity => $part) {
+                $current = $after->get($identity);
+                if (! $current) {
+                    $changes[] = "$label dihapus: {$part['code']}";
+                } elseif ($part['code'] !== $current['code']) {
+                    $changes[] = "$label diubah: {$part['code']} → {$current['code']}";
+                } elseif (array_diff_key($part, ['identity' => true]) != array_diff_key($current, ['identity' => true])) {
+                    $changes[] = "$label diubah: {$part['code']}";
+                }
+            }
+
+            foreach ($after->diffKeys($before) as $part) {
+                $changes[] = "$label ditambah: {$part['code']}";
+            }
+        }
+
+        return implode("\n", $changes);
     }
 
     public function import(int $periodId, int $unitId, int $indicatorId, array $rows, string $source): UnitReport

@@ -25,4 +25,9 @@ class Indicator extends Model
     {
         return array_merge($this->only(['code', 'name', 'description', 'version', 'form_type', 'aggregation', 'direction', 'result_field', 'denominator_field', 'ratio_scale', 'requires_attachment', 'requires_explanation', 'fields', 'items']), ['category' => $this->category->name]);
     }
+
+    public static function partIdentity(array $part): string
+    {
+        return $part['identity'] ?? 'legacy:'.$part['code'];
+    }
 }

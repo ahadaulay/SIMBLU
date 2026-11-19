@@ -89,7 +89,7 @@
                                                         class="btn btn-sm btn-outline-primary"
                                                         type="button"
                                                         wire:click="updateIndicator({{ $assignment->id }})"
-                                                        wire:confirm="Ambil definisi terbaru dari Kategori Indikator untuk indikator ini?"
+                                                        wire:confirm="Ambil definisi terbaru? Isian pada baris atau kolom yang dihapus dari master akan dikeluarkan dari laporan ini."
                                                         wire:loading.attr="disabled"
                                                         wire:target="updateIndicator({{ $assignment->id }})"
                                                     >

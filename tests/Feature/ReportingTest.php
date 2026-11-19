@@ -811,6 +811,25 @@ class ReportingTest extends TestCase
         $this->get(route('reports.attachment', $attachment))->assertOk();
     }
 
+    public function test_operator_can_delete_an_attachment_from_an_editable_report(): void
+    {
+        Storage::fake('local');
+        $report = $this->start();
+        $entry = $report->entries()->sole();
+        $editor = Livewire::test(ReportEditor::class, ['reportId' => $report->id]);
+        $editor->set('uploads.'.$entry->id, UploadedFile::fake()->create('proof.pdf', 10, 'application/pdf'))->assertHasNoErrors();
+        $attachment = $report->attachments()->sole();
+
+        $editor->set('sections.'.$entry->id.'.explanation', 'Isian belum disimpan')
+            ->call('deleteAttachment', $attachment->id)
+            ->assertHasNoErrors()
+            ->assertSet('sections.'.$entry->id.'.explanation', 'Isian belum disimpan');
+
+        $this->assertFalse($report->attachments()->whereKey($attachment->id)->exists());
+        Storage::disk('local')->assertMissing($attachment->path);
+        $this->assertSame('Lampiran dihapus.', $report->histories()->latest('id')->firstOrFail()->note);
+    }
+
     public function test_inactive_account_cannot_login_and_registration_cannot_assign_role(): void
     {
         auth()->logout();

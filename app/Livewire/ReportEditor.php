@@ -361,6 +361,24 @@ class ReportEditor extends Component
         session()->flash('success', 'Lampiran tersimpan. Isian yang belum disimpan tetap tersedia.');
     }
 
+    public function deleteAttachment(int $attachmentId, ReportWorkflow $workflow): void
+    {
+        [$path, $version] = DB::transaction(function () use ($attachmentId, $workflow): array {
+            $report = $workflow->locked($this->reportId, $this->version);
+            $workflow->assertEditable($report);
+            $attachment = $report->attachments()->findOrFail($attachmentId);
+            $attachment->delete();
+            $report->increment('version');
+            $workflow->history($report, $report->status, 'Lampiran dihapus.');
+
+            return [$attachment->path, $report->version];
+        });
+
+        $this->version = $version;
+        Storage::disk('local')->delete($path);
+        session()->flash('success', 'Lampiran dihapus. Isian yang belum disimpan tetap tersedia.');
+    }
+
     public function render(): View
     {
         $report = UnitReport::with(['unit', 'period', 'entries.sourceEntry', 'attachments', 'notes.user'])->findOrFail($this->reportId);

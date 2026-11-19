@@ -206,7 +206,16 @@
                 <div class="mt-3">
                     <h6>Lampiran {{ $definition['requires_attachment'] ? '(wajib)' : '(opsional)' }}</h6>
                     @foreach($report->attachments->where('entry_id',$entry->id) as $attachment)
-                        <a class="d-block mb-2" href="{{ route('reports.attachment',$attachment) }}">{{ $attachment->name }}</a>
+                        <div class="d-flex align-items-center gap-2 mb-2" wire:key="attachment-{{ $attachment->id }}">
+                            <a class="text-break" href="{{ route('reports.attachment', $attachment) }}">{{ $attachment->name }}</a>
+                            @if($editable)
+                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                    wire:click="deleteAttachment({{ $attachment->id }})"
+                                    wire:confirm="Hapus lampiran {{ $attachment->name }} dari laporan?"
+                                    wire:loading.attr="disabled"
+                                    aria-label="Hapus lampiran {{ $attachment->name }}">Hapus</button>
+                            @endif
+                        </div>
                     @endforeach
                     @if($editable)
                         @php($attachmentTypes = config('reporting.attachment_types'))

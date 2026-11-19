@@ -318,9 +318,15 @@ class ReportEditor extends Component
 
     public function upload(int $entryId, ReportWorkflow $workflow): void
     {
+        $types = implode(',', config('reporting.attachment_types'));
+        $maxKb = config('reporting.attachment_max_kb');
         $this->validate(
-            ['uploads.'.$entryId => ['required', 'file', 'mimes:'.implode(',', config('reporting.attachment_types')), 'max:'.config('reporting.attachment_max_kb')]],
-            [],
+            ['uploads.'.$entryId => ['required', 'file', 'mimes:'.$types, 'extensions:'.$types, 'max:'.$maxKb]],
+            [
+                'uploads.'.$entryId.'.mimes' => 'Lampiran harus berupa file PDF, XLSX, atau DOCX.',
+                'uploads.'.$entryId.'.extensions' => 'Lampiran harus memakai ekstensi PDF, XLSX, atau DOCX.',
+                'uploads.'.$entryId.'.max' => 'Ukuran lampiran maksimal '.($maxKb / 1024).' MB.',
+            ],
             ['uploads.'.$entryId => 'lampiran bukti'],
         );
         $file = $this->uploads[$entryId];

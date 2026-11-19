@@ -33,6 +33,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -723,6 +724,41 @@ class ReportingTest extends TestCase
         $fields[1]['operands'] = 'amount,system';
         $this->expectException(ValidationException::class);
         $calculator->validateDefinition($fields, [], 'SINGLE', 'result', 'SUM', null);
+    }
+
+    public function test_livewire_temporary_upload_enforces_attachment_limits(): void
+    {
+        Storage::fake('tmp-for-tests');
+        $url = URL::temporarySignedRoute('livewire.upload-file', now()->addMinute());
+        $this->postJson($url, ['files' => [UploadedFile::fake()->create('proof.pdf', 20480, 'application/pdf')]])
+            ->assertOk()->assertJsonCount(1, 'paths');
+        $this->postJson($url, ['files' => [UploadedFile::fake()->create('proof.pdf', 20481, 'application/pdf')]])
+            ->assertUnprocessable()->assertJsonValidationErrors('files.0');
+        $this->postJson($url, ['files' => [UploadedFile::fake()->image('proof.jpg')]])
+            ->assertUnprocessable()->assertJsonValidationErrors('files.0');
+        $this->postJson($url, ['files' => [
+            UploadedFile::fake()->create('proof.xlsx', 10),
+            UploadedFile::fake()->create('proof.docx', 10),
+        ]])->assertOk()->assertJsonCount(2, 'paths');
+    }
+
+    public function test_attachment_editor_only_accepts_pdf_xlsx_and_docx_up_to_twenty_mb(): void
+    {
+        Storage::fake('local');
+        $report = $this->start();
+        $upload = 'uploads.'.$report->entries()->sole()->id;
+        $editor = Livewire::test(ReportEditor::class, ['reportId' => $report->id])
+            ->assertSee('PDF, XLSX, DOCX, maks. 20 MB', false)
+            ->assertSee('accept=".pdf,.xlsx,.docx"', false)
+            ->set($upload, UploadedFile::fake()->create('proof.pdf', 20481, 'application/pdf'))->assertHasErrors($upload)
+            ->set($upload, UploadedFile::fake()->create('proof.txt', 10, 'application/pdf'))->assertHasErrors($upload)
+            ->set($upload, UploadedFile::fake()->create('proof.pdf', 10, 'image/jpeg'))->assertHasErrors($upload);
+        $this->assertSame(0, $report->attachments()->count());
+
+        $editor->set($upload, UploadedFile::fake()->create('proof.pdf', 20480, 'application/pdf'))->assertHasNoErrors()
+            ->set($upload, UploadedFile::fake()->create('proof.xlsx', 10))->assertHasNoErrors()
+            ->set($upload, UploadedFile::fake()->create('proof.docx', 10))->assertHasNoErrors();
+        $this->assertSame(3, $report->attachments()->count());
     }
 
     public function test_private_attachment_upload_and_required_evidence(): void

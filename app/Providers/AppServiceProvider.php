@@ -23,6 +23,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $attachmentTypes = implode(',', config('reporting.attachment_types'));
+        config(['livewire.temporary_file_upload.rules' => [
+            'required', 'file', 'mimes:'.$attachmentTypes, 'extensions:'.$attachmentTypes, 'max:'.config('reporting.attachment_max_kb'),
+        ]]);
+
         Gate::define('reporting-admin', fn (User $user) => $user->hasReportingRole(['ADMIN']));
         Gate::define('reporting-access', fn (User $user) => $user->hasReportingRole(['ADMIN', 'UNIT', 'PIMPINAN']));
         Gate::define('reporting-view', fn (User $user, UnitReport $report) => $user->hasReportingRole(['ADMIN', 'PIMPINAN']) || ($user->hasReportingRole(['UNIT']) && $user->unit_id === $report->unit_id));

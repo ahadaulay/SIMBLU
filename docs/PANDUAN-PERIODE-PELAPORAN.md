@@ -313,7 +313,7 @@ Saat diajukan, sistem melakukan validasi lengkap:
 - pilihan tidak ada kegiatan harus disertai alasan;
 - indikator yang mewajibkan bukti harus memiliki lampiran.
 
-Lampiran yang diterima saat ini adalah PDF, JPG, JPEG, PNG, XLSX, dan DOCX dengan ukuran maksimum 10 MB per berkas.
+Lampiran yang diterima adalah PDF, XLSX, dan DOCX dengan ukuran maksimum 20 MB per berkas.
 
 Unit hanya dapat mengubah laporan ketika:
 

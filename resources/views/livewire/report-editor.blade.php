@@ -202,8 +202,31 @@
                         <a class="d-block mb-2" href="{{ route('reports.attachment',$attachment) }}">{{ $attachment->name }}</a>
                     @endforeach
                     @if($editable)
-                        <label for="upload-{{ $entry->id }}">Bukti pendukung (maks. {{ config('reporting.attachment_max_kb') / 1024 }} MB)</label>
-                        <input id="upload-{{ $entry->id }}" type="file" class="form-control mb-2" wire:model="uploads.{{ $entry->id }}">
+                        @php($attachmentTypes = config('reporting.attachment_types'))
+                        @php($attachmentMaxKb = config('reporting.attachment_max_kb'))
+                        <div x-data="{ uploadError: '' }">
+                            <label for="upload-{{ $entry->id }}">Bukti pendukung ({{ strtoupper(implode(', ', $attachmentTypes)) }}, maks. {{ $attachmentMaxKb / 1024 }} MB)</label>
+                            <input id="upload-{{ $entry->id }}" type="file" class="form-control mb-2"
+                                accept=".{{ implode(',.', $attachmentTypes) }}"
+                                wire:model="uploads.{{ $entry->id }}"
+                                x-on:change.capture="
+                                    uploadError = '';
+                                    const file = $event.target.files[0];
+                                    if (file) {
+                                        const extension = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
+                                        if (!$event.target.accept.split(',').includes(extension)) {
+                                            uploadError = 'Pilih file PDF, XLSX, atau DOCX.';
+                                        } else if (file.size > {{ $attachmentMaxKb * 1024 }}) {
+                                            uploadError = 'Ukuran lampiran maksimal {{ $attachmentMaxKb / 1024 }} MB.';
+                                        }
+                                        if (uploadError) {
+                                            $event.stopImmediatePropagation();
+                                            $event.target.value = '';
+                                        }
+                                    }
+                                ">
+                            <div x-cloak x-show="uploadError" x-text="uploadError" class="text-danger" role="alert"></div>
+                        </div>
                         <div wire:loading wire:target="uploads.{{ $entry->id }},upload" class="text-muted" role="status">Mengunggah...</div>
                         @error('uploads.'.$entry->id)
                             <div class="text-danger">{{ $message }}</div>

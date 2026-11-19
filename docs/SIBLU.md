@@ -75,7 +75,7 @@ Workbook lama belum diimpor otomatis ke database: pemetaan blok dan definisi sep
 
 Jalankan `php artisan test` dan `php vendor/bin/pint --test`. Jika PHP Windows belum mengaktifkan SQLite, jalankan pengujian dengan `php -d extension=pdo_sqlite -d extension=sqlite3 vendor/phpunit/phpunit/phpunit`; database pengujian berada di memori.
 
-Lampiran disimpan privat di disk local dan diunduh melalui pemeriksaan akses. Batas awal 10 MB dengan PDF, JPG, PNG, XLSX, DOCX; tersedia di konfigurasi reporting. Tidak ada email/notifikasi eksternal yang ditambahkan.
+Lampiran disimpan privat di disk local dan diunduh melalui pemeriksaan akses. Format PDF, XLSX, dan DOCX dengan batas 20 MB per berkas diatur melalui konfigurasi reporting. Tidak ada email/notifikasi eksternal yang ditambahkan.
 
 Ekspor langsung tersedia untuk laporan kecil. Ekspor latar belakang memakai koneksi queue `reporting` dan tabel `reporting_jobs`. Jalankan worker dengan `php artisan queue:work reporting --timeout=300 --tries=1`. Pemilik permintaan memeriksa status dan mengunduh hasil dari halaman Laporan Custom. Status gagal ditampilkan tanpa membocorkan data internal. File hasil antrean disimpan privat dan hak akses diperiksa kembali ketika diunduh.
 
